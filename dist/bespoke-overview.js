@@ -7,17 +7,14 @@
  */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var o;"undefined"!=typeof window?o=window:"undefined"!=typeof global?o=global:"undefined"!=typeof self&&(o=self);var n=o;n=n.bespoke||(n.bespoke={}),n=n.plugins||(n.plugins={}),n.overview=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-// TODO
-// - deactivate current slide?
-// - inject bespoke-overview CSS into presentation
-// - tests
-// - only use overflow div if Chrome + transform scale; or should we always enable?
 module.exports = function(opts) {
   return function(deck) {
     var KEYCODE_O = 79,
+    KEYCODE_ENTR = 13,
+    KEYCODE_ESC = 27,
     RE_CSV = new RegExp(', *'),
     overviewClassName = 'bespoke-overview',
-    activeSlideIndex = 0,
+    focusedSlideIndex = 0,
     overviewActive = false,
     cols = typeof opts !== 'undefined' && typeof opts.cols !== 'undefined' ? parseInt(opts.cols) : 3,
     margin = typeof opts !== 'undefined' && typeof opts.margin !== 'undefined' ? parseFloat(opts.margin) : 10,
@@ -43,11 +40,39 @@ module.exports = function(opts) {
     isOverviewActive = function() {
       return overviewActive;
     },
-    navigate = function() {
-      return !isOverviewActive();
+    navigate = function(step) {
+      if (isOverviewActive()) {
+        // detect boundary
+        if ((step === -1 && focusedSlideIndex === 0) ||
+            (step === 1 && focusedSlideIndex + 1 === deck.slides.length)) {
+          return false;
+        }
+        var focusedSlide = deck.slides[focusedSlideIndex];
+        focusedSlide.removeAttribute('aria-selected');
+        focusedSlide = deck.slides[focusedSlideIndex += step];
+        focusedSlide.setAttribute('aria-selected', true);
+        // TODO use a smarter scrollTo that only scrolls if necessary
+        if (focusedSlideIndex < cols) {
+          if (deck.parent.scrollTop > 0) {
+            if (deck.parent.scrollTo) {
+              deck.parent.scrollTo(0, 0);
+            }
+            else {
+              deck.parent.scrollTop = 0;
+            }
+          }
+        }
+        else {
+          focusedSlide.scrollIntoView(true);
+        }
+        return false;
+      }
+      else {
+        return true;
+      }
     },
     activateOverview = function() {
-      activeSlideIndex = deck.slide();
+      focusedSlideIndex = deck.slide();
 
       var parent = deck.parent,
         firstSlide = deck.slides[0],
@@ -77,6 +102,8 @@ module.exports = function(opts) {
       parent.classList.add(overviewClassName);
       // NOTE we need fine-grained control over scrollbar, so override CSS
       parent.style.overflowY = 'scroll';
+      // NOTE supported in Chrome by enabling Smooth Scrolling in chrome://flags
+      parent.style.scrollBehavior = 'smooth';
 
       var baseMargin = margin / baseScale,
         deckWidth = parent.clientWidth / baseScale,
@@ -123,25 +150,23 @@ module.exports = function(opts) {
       });
 
       // TODO add option for scrollIntoView position (top, bottom, disabled)
-      if (activeSlideIndex >= cols) {
-        // NOTE supported in Chrome by enabling "Smooth Scrolling" in chrome://flags
-        parent.style.scrollBehavior = 'smooth';
-        var activeSlide = deck.slides[activeSlideIndex];
-        var transitionDuration = getTransitionDurationMs(activeSlide, 'transform');
+      if (focusedSlideIndex >= cols) {
+        var focusedSlide = deck.slides[focusedSlideIndex];
+        var transitionDuration = getTransitionDurationMs(focusedSlide, 'transform');
+        // TODO use scrollTo so that we leave margin above slide (like first row)
         if (transitionDuration > 0) {
-          setTimeout(function() {
-            // TODO use scrollTo so that we leave margin above slide (like first row)
-            activeSlide.scrollIntoView(true);
-          }, transitionDuration + 100);
+          // add slight delay to give transition ample time to complete
+          setTimeout(function() { focusedSlide.scrollIntoView(true); }, transitionDuration + 100);
         }
         else {
-          activeSlide.scrollIntoView(true);
+          focusedSlide.scrollIntoView(true);
         }
       }
+      deck.slides[focusedSlideIndex].setAttribute('aria-selected', true);
       overviewActive = true;
     },
     exitOverview = function(selectedSlideIndex) {
-      var selection = typeof selectedSlideIndex === 'number' ? selectedSlideIndex : activeSlideIndex;
+      var selection = typeof selectedSlideIndex === 'number' ? selectedSlideIndex : focusedSlideIndex;
       if (selection !== deck.slide()) deck.slide(selection);
 
       // NOTE the order of operations are critical, heavily impact smoothness of transition
@@ -158,18 +183,27 @@ module.exports = function(opts) {
         slide.removeEventListener('click', onOverviewClicked, false);
       });
       parent.classList.remove(overviewClassName);
+      deck.slides[focusedSlideIndex].removeAttribute('aria-selected');
       overviewActive = false;
     },
     toggleOverview = function() {
       isOverviewActive() ? exitOverview() : activateOverview();
     },
     keydownHandler = function(e) {
-      if (e.which === KEYCODE_O) toggleOverview();
+      switch(e.which) {
+        case KEYCODE_O:
+        case KEYCODE_ESC:
+          toggleOverview();
+          break;
+        case KEYCODE_ENTR:
+          if (isOverviewActive()) exitOverview();
+          break;
+      }
     };
 
     document.addEventListener('keydown', keydownHandler, false);
-    deck.on('next', navigate);
-    deck.on('prev', navigate);
+    deck.on('next', navigate.bind(null, 1));
+    deck.on('prev', navigate.bind(null, -1));
   };
 };
 

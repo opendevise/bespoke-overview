@@ -116,11 +116,36 @@ p {
   z-index: 100;
 }
 
-.bespoke-overview {
 /*
+.bespoke-overview {
   overflow-y: scroll;
   scroll-behavior: smooth;
+}
 */
+
+.bespoke-overview .bespoke-slide {
+  opacity: 1;
+  /* undo bespoke-scale */
+  /*
+  zoom: 1 !important;
+  */
+  cursor: pointer;
+  pointer-events: auto;
+
+  transform-origin: top left;
+  /* NOTE transition going into slide overview */
+  -webkit-transition: transform 0.1s ease-out, opacity 0.8s ease;
+     -moz-transition: transform 0.1s ease-out, opacity 0.8s ease;
+       -o-transition: transform 0.1s ease-out, opacity 0.8s ease;
+          transition: transform 0.1s ease-out, opacity 0.8s ease;
+}
+
+.bespoke-overview .bespoke-bullet {
+  opacity: 1;
+}
+
+.bespoke-overview .bespoke-slide * {
+  pointer-events: none;
 }
 
 /* ensure Firefox leaves some room below last slide in overview mode */
@@ -136,29 +161,12 @@ p {
   visibility: hidden;
 }
 
-.bespoke-overview .bespoke-slide,
-.bespoke-overview .bespoke-bullet {
-  opacity: 1;
-}
-
-.bespoke-overview .bespoke-slide {
-  /* undo bespoke-scale */
+.bespoke-overview .bespoke-slide[aria-selected] {
+  /* NOTE outline wraps around ::after in Firefox */
   /*
-  zoom: 1 !important;
+  outline: 0.25ex solid lightskyblue;
+  outline-offset: calc(1px - 0.25ex);
   */
-  cursor: pointer;
-  pointer-events: auto;
-}
-
-.bespoke-overview .bespoke-slide * {
-  pointer-events: none;
-}
-
-.bespoke-overview section.bespoke-slide {
-  transform-origin: top left;
-  /* NOTE transition going into slide overview */
-  -webkit-transition: transform 0.1s ease-out, opacity 0.8s ease;
-     -moz-transition: transform 0.1s ease-out, opacity 0.8s ease;
-       -o-transition: transform 0.1s ease-out, opacity 0.8s ease;
-          transition: transform 0.1s ease-out, opacity 0.8s ease;
+  /* NOTE border is slighly off in Chrome when zoom is applied to slide */
+  border: medium solid lightskyblue;
 }
