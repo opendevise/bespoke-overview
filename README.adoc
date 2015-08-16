@@ -1,0 +1,56 @@
+= bespoke-overview
+Dan Allen
+:idprefix:
+:idseparator: -
+
+Presents an overview of all the slides in a http://markdalgleish.com/projects/bespoke.js[bespoke.js] presentation.
+The overview can be used as a navigation aid to navigate to an arbitrary slide.
+
+== Download
+
+Download the https://raw.github.com/opendevise/bespoke-overview/master/dist/bespoke-overview.min.js[production version] or the https://raw.github.com/opendevise/bespoke-overview/master/dist/bespoke-overview.js[development version], or use a <<package-managers,package manager>>.
+
+== Usage
+
+This plugin is shipped in a https://github.com/umdjs/umd[UMD format], meaning that it is available as a CommonJS/AMD module or browser global.
+
+For example, when using CommonJS modules:
+
+```js
+var bespoke = require('bespoke'),
+  overview = require('bespoke-overview');
+
+bespoke.from('#presentation', [
+  overview()
+]);
+```
+
+When using browser globals:
+
+```js
+bespoke.from('#presentation', [
+  bespoke.plugins.overview()
+]);
+```
+
+== Package managers
+
+=== npm
+
+```bash
+$ npm install bespoke-overview
+```
+
+=== Bower
+
+```bash
+$ bower install bespoke-overview
+```
+
+== Credits
+
+This plugin was built with https://github.com/markdalgleish/generator-bespokeplugin[generator-bespokeplugin].
+
+== License
+
+http://en.wikipedia.org/wiki/MIT_License[MIT License]

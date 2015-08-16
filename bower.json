@@ -1,0 +1,10 @@
+{
+  "name": "bespoke-overview",
+  "main": "./dist/bespoke-overview.js",
+  "ignore": [
+    "**/.*"
+  ],
+  "dependencies": {
+    "bespoke.js": ">=1.0.0"
+  }
+}

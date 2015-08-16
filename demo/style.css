@@ -1,0 +1,164 @@
+* {
+  -moz-box-sizing: inherit;
+       box-sizing: inherit;
+}
+
+html {
+  -moz-box-sizing: border-box;
+       box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+h1 {
+  margin: 0;
+}
+
+p {
+  margin: 0.5em 0;
+}
+
+#presentation {
+  font-family: Arial, sans-serif;
+  font-size: 2em;
+  line-height: 1.6;
+  color: #303030;
+  /* enable kerning using forward-compatible CSS */
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1;
+  font-kerning: normal;
+  /* QUESTION should we toggle display property instead of visibility? */
+  visibility: hidden;
+}
+
+#presentation section {
+  /* hide until bespoke classes are added; also prevents transitions during load */
+  /* QUESTION should we toggle visibility instead? That doesn't appear to solve the messy load problem */
+  display: none;
+}
+
+#presentation.bespoke-parent,
+.bespoke-scale-parent {
+  /*
+  hide presentation until loaded (bespoke-parent);
+  prevent wrapper elements for inactive slides from blocking focus of the current slide (bespoke-scale-parent)
+  */
+  visibility: visible;
+}
+
+.bespoke-parent,
+.bespoke-scale-parent {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  /*
+  right: 0;
+  bottom: 0;
+  */
+  /* ...or use size of viewport */
+  width: 100vw;
+  height: 100vh;
+}
+
+.bespoke-parent {
+  /* QUESTION should we move this to #presentation ? */
+  overflow: hidden;
+}
+
+#presentation section.bespoke-slide {
+  /* QUESTION should we toggle visibility instead? That doesn't appear to solve the messy load problem. */
+  display: -webkit-flex;
+          display: flex;
+}
+
+/* QUESTION move some of these properties to #presentation section rule? */
+.bespoke-slide {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 640px;
+  margin-left: -320px;
+  height: 360px;
+  margin-top: -180px;
+  -webkit-align-items: center;
+          align-items: center;
+  -webkit-justify-content: center;
+          justify-content: center;
+  -webkit-flex-direction: column;
+          flex-direction: column;
+  /* QUESTION should we apply padding to inner content container instead? */
+  padding: 1em;
+  /* NOTE transition between slides, going out of slide overview */
+  -webkit-transition: transform 0.3s ease, opacity 0.3s ease;
+     -moz-transition: transform 0.3s ease, opacity 0.3s ease;
+       -o-transition: transform 0.3s ease, opacity 0.3s ease;
+          transition: transform 0.3s ease, opacity 0.3s ease;
+
+  /* force opacity to start at 0 to avoid transition on load when using bespoke-scale */
+  opacity: 0;
+  /* revert visibility inherited by bespoke-scale-parent */
+  visibility: visible;
+}
+
+.bespoke-inactive {
+  /* setting opacity here is redundant */
+  /*opacity: 0;*/
+  /* don't let pointer events get trapped by inactive slides */
+  pointer-events: none;
+}
+
+.bespoke-active {
+  opacity: 1;
+  /* ensure current slide is on top when coming out of overview */
+  z-index: 100;
+}
+
+.bespoke-overview {
+/*
+  overflow-y: scroll;
+  scroll-behavior: smooth;
+*/
+}
+
+/* ensure Firefox leaves some room below last slide in overview mode */
+/* we could insert the values for bottom and height into live stylesheet dynamically */
+.bespoke-overview section.bespoke-slide:last-of-type::after {
+  position: absolute;
+  display: block;
+  content: '';
+  left: 0;
+  bottom: -5%;
+  height: 5%;
+  width: 100%;
+  visibility: hidden;
+}
+
+.bespoke-overview .bespoke-slide,
+.bespoke-overview .bespoke-bullet {
+  opacity: 1;
+}
+
+.bespoke-overview .bespoke-slide {
+  /* undo bespoke-scale */
+  /*
+  zoom: 1 !important;
+  */
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.bespoke-overview .bespoke-slide * {
+  pointer-events: none;
+}
+
+.bespoke-overview section.bespoke-slide {
+  transform-origin: top left;
+  /* NOTE transition going into slide overview */
+  -webkit-transition: transform 0.1s ease-out, opacity 0.8s ease;
+     -moz-transition: transform 0.1s ease-out, opacity 0.8s ease;
+       -o-transition: transform 0.1s ease-out, opacity 0.8s ease;
+          transition: transform 0.1s ease-out, opacity 0.8s ease;
+}
