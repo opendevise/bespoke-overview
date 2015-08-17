@@ -45,6 +45,7 @@ module.exports = function(opts) {
         var focusedSlide = deck.slides[focusedSlideIndex];
         focusedSlide.removeAttribute('aria-selected');
         focusedSlide = deck.slides[focusedSlideIndex += step];
+        deck.slide(focusedSlideIndex);
         focusedSlide.setAttribute('aria-selected', true);
         // TODO use a smarter scrollTo that only scrolls if necessary
         if (focusedSlideIndex < cols) {
@@ -66,9 +67,15 @@ module.exports = function(opts) {
         return true;
       }
     },
+    scrollToSlide = function(e) {
+      if (e.propertyName === 'transform') {
+        deck.slides[focusedSlideIndex].scrollIntoView(true);
+        this.removeEventListener('transitionend', scrollToSlide, false);
+      }
+    },
     activateOverview = function() {
       var parent = deck.parent,
-        lastSlide = deck.slides[0],
+        lastSlide = deck.slides[deck.slides.length - 1],
         focusedSlide = deck.slides[focusedSlideIndex = deck.slide()],
         baseScale,
         isZoomed = false;
@@ -143,11 +150,7 @@ module.exports = function(opts) {
       // TODO add option for scrollIntoView position (top, bottom, disabled)
       if (focusedSlideIndex >= cols) {
         if (hasTransition(lastSlide)) {
-          // TODO extract method (using bind to pass argument)
-          var scrollToSlide = function() {
-            focusedSlide.scrollIntoView(true);
-            this.removeEventListener('transitionend', scrollToSlide, false);  
-          };
+          // QUESTION should use use scrollToSlide.bind(focusedSlide) instead?
           lastSlide.addEventListener('transitionend', scrollToSlide, false);
         }
         else {
@@ -157,9 +160,8 @@ module.exports = function(opts) {
       focusedSlide.setAttribute('aria-selected', true);
       overviewActive = true;
     },
-    exitOverview = function(selectedSlideIndex) {
-      var selection = typeof selectedSlideIndex === 'number' ? selectedSlideIndex : focusedSlideIndex;
-      if (selection !== deck.slide()) deck.slide(selection);
+    exitOverview = function(selection) {
+      if (typeof selection === 'number' && selection !== focusedSlideIndex) deck.slide(selection);
 
       // NOTE the order of operations are critical, heavily impact smoothness of transition
       var parent = deck.parent,
