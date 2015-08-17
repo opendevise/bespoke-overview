@@ -20,7 +20,7 @@ p {
   margin: 0.5em 0;
 }
 
-#presentation {
+.presentation {
   font-family: Arial, sans-serif;
   font-size: 2em;
   line-height: 1.6;
@@ -29,23 +29,17 @@ p {
   text-rendering: optimizeLegibility;
   font-feature-settings: "kern" 1;
   font-kerning: normal;
-  /* QUESTION should we toggle display property instead of visibility? */
-  visibility: hidden;
 }
 
-#presentation section {
-  /* hide until bespoke classes are added; also prevents transitions during load */
-  /* QUESTION should we toggle visibility instead? That doesn't appear to solve the messy load problem */
+/* Hide presentation and slide content until bespoke.js has added classes */
+.presentation:not(.bespoke-parent),
+.presentation section:not(.bespoke-slide) {
   display: none;
 }
 
-#presentation.bespoke-parent,
-.bespoke-scale-parent {
-  /*
-  hide presentation until loaded (bespoke-parent);
-  prevent wrapper elements for inactive slides from blocking focus of the current slide (bespoke-scale-parent)
-  */
-  visibility: visible;
+.bespoke-parent {
+  pointer-events: none;
+  overflow: hidden;
 }
 
 .bespoke-parent,
@@ -53,29 +47,13 @@ p {
   position: absolute;
   top: 0;
   left: 0;
-
-  /*
-  right: 0;
-  bottom: 0;
-  */
-  /* ...or use size of viewport */
   width: 100vw;
   height: 100vh;
 }
 
-.bespoke-parent {
-  /* QUESTION should we move this to #presentation ? */
-  overflow: hidden;
-}
-
-#presentation section.bespoke-slide {
-  /* QUESTION should we toggle visibility instead? That doesn't appear to solve the messy load problem. */
-  display: -webkit-flex;
-          display: flex;
-}
-
-/* QUESTION move some of these properties to #presentation section rule? */
 .bespoke-slide {
+  /* force opacity to start at 0 to avoid transition on load when using bespoke-scale */
+  opacity: 0;
   position: absolute;
   top: 50%;
   left: 50%;
@@ -83,6 +61,8 @@ p {
   margin-left: -320px;
   height: 360px;
   margin-top: -180px;
+  display: -webkit-flex;
+          display: flex;
   -webkit-align-items: center;
           align-items: center;
   -webkit-justify-content: center;
@@ -96,24 +76,20 @@ p {
      -moz-transition: transform 0.3s ease, opacity 0.3s ease;
        -o-transition: transform 0.3s ease, opacity 0.3s ease;
           transition: transform 0.3s ease, opacity 0.3s ease;
-
-  /* force opacity to start at 0 to avoid transition on load when using bespoke-scale */
-  opacity: 0;
-  /* revert visibility inherited by bespoke-scale-parent */
-  visibility: visible;
 }
 
 .bespoke-inactive {
-  /* setting opacity here is redundant since we start out at opacity 0 */
-  /*opacity: 0;*/
-  /* don't let pointer events get trapped by inactive slides */
-  pointer-events: none;
+  /* setting opacity here is redundant */
+  /*
+  opacity: 0;
+  */
 }
 
 .bespoke-active {
+  pointer-events: auto;
   opacity: 1;
   /* ensure current slide is on top when coming out of overview */
-  z-index: 100;
+  z-index: 1;
 }
 
 /*
@@ -125,13 +101,8 @@ p {
 
 .bespoke-overview .bespoke-slide {
   opacity: 1;
-  /* undo bespoke-scale */
-  /*
-  zoom: 1 !important;
-  */
   cursor: pointer;
   pointer-events: auto;
-
   transform-origin: top left;
   /* NOTE transition going into slide overview */
   -webkit-transition: transform 0.1s ease-out, opacity 0.8s ease;
@@ -140,9 +111,13 @@ p {
           transition: transform 0.1s ease-out, opacity 0.8s ease;
 }
 
-/* Firefox adds selection around img (when clicked) if pointer-events: none */
-.bespoke-overview .bespoke-slide *:not(img) {
+.bespoke-overview .bespoke-slide * {
   pointer-events: none;
+}
+
+/* Firefox adds selection around img (when clicked) if pointer-events: none */
+.bespoke-overview .bespoke-slide img {
+  pointer-events: auto;
 }
 
 .bespoke-overview .bespoke-bullet {
