@@ -103,8 +103,8 @@ p {
   opacity: 1;
   cursor: pointer;
   pointer-events: auto;
-  transform-origin: top left;
   /* NOTE transition going into slide overview */
+  /* IMPORTANT transform-origin is assumed to be 50% 50% */
   -webkit-transition: transform 0.1s ease-out, opacity 0.8s ease;
      -moz-transition: transform 0.1s ease-out, opacity 0.8s ease;
        -o-transition: transform 0.1s ease-out, opacity 0.8s ease;
