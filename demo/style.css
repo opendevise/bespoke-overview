@@ -9,6 +9,7 @@ html {
 }
 
 body {
+  font-family: 'Noto Sans', Arial, sans-serif;
   margin: 0;
 }
 
@@ -21,7 +22,6 @@ p {
 }
 
 .presentation {
-  font-family: Arial, sans-serif;
   font-size: 2em;
   line-height: 1.6;
   color: #303030;
@@ -88,66 +88,12 @@ p {
 .bespoke-active {
   pointer-events: auto;
   opacity: 1;
-  /* ensure current slide is on top when coming out of overview */
-  z-index: 1;
 }
 
-/*
-.bespoke-overview {
-  overflow-y: scroll;
-  scroll-behavior: smooth;
-}
-*/
-
+/* custom transition (for now, only when entering overview) */
 .bespoke-overview .bespoke-slide {
-  opacity: 1;
-  cursor: pointer;
-  pointer-events: auto;
-  /* NOTE transition going into slide overview */
-  /* IMPORTANT transform-origin is assumed to be 50% 50% */
-  -webkit-transition: transform 0.1s ease-out, opacity 0.8s ease;
-     -moz-transition: transform 0.1s ease-out, opacity 0.8s ease;
-       -o-transition: transform 0.1s ease-out, opacity 0.8s ease;
-          transition: transform 0.1s ease-out, opacity 0.8s ease;
-}
-
-.bespoke-overview .bespoke-slide * {
-  pointer-events: none;
-}
-
-/* Firefox adds selection around img (when clicked) if pointer-events: none */
-.bespoke-overview .bespoke-slide img {
-  pointer-events: auto;
-}
-
-.bespoke-overview .bespoke-bullet {
-  opacity: 1;
-}
-
-.bespoke-overview .bespoke-backdrop-active,
-.bespoke-overview .bespoke-progress-bar {
-  opacity: 0;
-}
-
-/* ensure Firefox leaves some room below last slide in overview mode */
-/* we could insert the values for bottom and height into live stylesheet dynamically */
-.bespoke-overview section.bespoke-slide:last-of-type::after {
-  position: absolute;
-  display: block;
-  content: '';
-  left: 0;
-  bottom: -5%;
-  height: 5%;
-  width: 100%;
-  visibility: hidden;
-}
-
-.bespoke-overview .bespoke-slide[aria-selected] {
-  /* NOTE outline wraps around ::after in Firefox */
-  /*
-  outline: 0.25ex solid lightskyblue;
-  outline-offset: calc(1px - 0.25ex);
-  */
-  /* NOTE border is slighly off in Chrome when zoom is applied to slide */
-  border: medium solid lightskyblue;
+  -webkit-transition: transform 0.3s ease-out, opacity 0.8s ease-in-out;
+     -moz-transition: transform 0.3s ease-out, opacity 0.8s ease-in-out;
+       -o-transition: transform 0.3s ease-out, opacity 0.8s ease-in-out;
+          transition: transform 0.3s ease-out, opacity 0.8s ease-in-out;
 }

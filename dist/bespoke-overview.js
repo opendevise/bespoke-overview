@@ -7,7 +7,11 @@
  */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var o;"undefined"!=typeof window?o=window:"undefined"!=typeof global?o=global:"undefined"!=typeof self&&(o=self);var n=o;n=n.bespoke||(n.bespoke={}),n=n.plugins||(n.plugins={}),n.overview=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+
+var insertCss = _dereq_('insert-css');
+
 module.exports = function(opts) {
+  insertCss(".bespoke-overview .bespoke-slide{opacity:1;cursor:pointer;pointer-events:auto}\n/* force Firefox to leave room below last row of slides in overview */\n.bespoke-overview .bespoke-slide:last-of-type::after{position:absolute;display:block;content:'';left:0;bottom:-5%;height:5%;width:100%;visibility:hidden}\n.bespoke-overview .bespoke-slide[aria-selected]{border:0.25ex solid #bbdefb}\n.bespoke-overview .bespoke-slide *:not(img){pointer-events:none}\n.bespoke-overview .bespoke-bullet {opacity:1}\n/* ensure current slide is on top when exiting overview */\n.bespoke-active{z-index:1}", { prepend: true });
   return function(deck) {
     var KEYCODE = { o: 79, enter: 13, esc: 27 },
     overviewClassName = 'bespoke-overview',
@@ -203,6 +207,30 @@ module.exports = function(opts) {
     deck.on('next', navigate.bind(null, 1));
     deck.on('prev', navigate.bind(null, -1));
   };
+};
+
+},{"insert-css":2}],2:[function(_dereq_,module,exports){
+var inserted = {};
+
+module.exports = function (css, options) {
+    if (inserted[css]) return;
+    inserted[css] = true;
+    
+    var elem = document.createElement('style');
+    elem.setAttribute('type', 'text/css');
+
+    if ('textContent' in elem) {
+      elem.textContent = css;
+    } else {
+      elem.styleSheet.cssText = css;
+    }
+    
+    var head = document.getElementsByTagName('head')[0];
+    if (options && options.prepend) {
+        head.insertBefore(elem, head.childNodes[0]);
+    } else {
+        head.appendChild(elem);
+    }
 };
 
 },{}]},{},[1])

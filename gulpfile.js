@@ -57,6 +57,7 @@ gulp.task('coveralls', ['test'], function() {
 
 gulp.task('compile', ['clean'], function() {
   return browserify('./lib/bespoke-overview.js')
+    .transform('brfs')
     .bundle({ standalone: 'bespoke.plugins.overview' })
     .pipe(source('bespoke-overview.js'))
     .pipe(buffer())
