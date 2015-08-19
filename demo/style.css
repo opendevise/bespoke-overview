@@ -38,7 +38,6 @@ p {
 }
 
 .bespoke-parent {
-  pointer-events: none;
   /* IMPORTANT don't put overflow on other wrapper elements */
   overflow: hidden;
 }
@@ -50,6 +49,10 @@ p {
   left: 0;
   width: 100vw;
   height: 100vh;
+}
+
+.bespoke-parent > *:not(.bespoke-slide) {
+  pointer-events: none;
 }
 
 .bespoke-slide {
