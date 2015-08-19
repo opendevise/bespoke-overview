@@ -11,7 +11,7 @@
 var insertCss = _dereq_('insert-css');
 
 module.exports = function(opts) {
-  var css = ".bespoke-overview.bespoke-parent{pointer-events:auto}\n.bespoke-overview *:not(img){pointer-events:none}\n.bespoke-overview .bespoke-slide{opacity:1;cursor:pointer;pointer-events:auto}\n.bespoke-overview .bespoke-slide[aria-selected]{outline:0.4vw solid #cfd8dc;outline-offset:-0.2vw}\n.bespoke-overview .bespoke-bullet {opacity:1}\n.bespoke-active{z-index:1}\n";
+  var css = ".bespoke-overview.bespoke-parent{pointer-events:auto}\n.bespoke-overview *:not(img){pointer-events:none}\n.bespoke-overview .bespoke-slide{opacity:1;cursor:pointer;pointer-events:auto}\n.bespoke-overview .bespoke-slide[aria-selected]{outline:0.4vw solid #cfd8dc;outline-offset:-0.2vw}\n.bespoke-overview .bespoke-bullet {opacity:1}\n.bespoke-overview .bespoke-overflow{position:absolute;top:100%;left:0;height:0.5px;width:100%}\n/* TODO change the following rule to .bespoke-transition .bespoke-active once the class is enabled */\n.bespoke-active{z-index:1}";
   insertCss(css, { prepend: true });
 
   return function(deck) {
@@ -97,17 +97,16 @@ module.exports = function(opts) {
       }
 
       // NOTE force the scrollbar to become visible using overflow content to work around issue in Chrome
-      // FIXME only necessary when transform scale is used in Chrome; though maybe we should always add it?
-      if ('zoom' in parent.style) {
-        var overflow = document.createElement('div');
-        overflow.className = overviewClassName;
-        overflow.style.cssText = 'position:absolute; top:100vh; left:0; height:1px; width:100vw; pointer-events:none';
-        parent.appendChild(overflow);
-      }
+      //if (scaleParent && 'zoom' in parent.style) {
+      //  var overflow = document.createElement('div');
+      //  overflow.className = 'bespoke-overflow';
+      //  parent.appendChild(overflow);
+      //}
 
       // QUESTION should we add class to html or body element instead?
       parent.classList.add(overviewClassName);
       // NOTE we need fine-grained control over scrollbar, so override CSS
+      // QUESTION should we put scroll on body element?
       parent.style.overflowY = 'scroll';
       // NOTE supported in Chrome by enabling smooth scrolling in chrome://flags
       parent.style.scrollBehavior = 'smooth';
