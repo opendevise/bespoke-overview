@@ -11,7 +11,7 @@
 var insertCss = _dereq_('insert-css');
 
 module.exports = function(opts) {
-  var css = ".bespoke-overview.bespoke-parent{pointer-events:auto}\n.bespoke-overview *:not(img){pointer-events:none}\n.bespoke-overview .bespoke-slide{opacity:1;cursor:pointer;pointer-events:auto}\n/* force Firefox to leave room below last row of slides in overview */\n.bespoke-overview .bespoke-slide:last-of-type::after{position:absolute;display:block;content:'';left:0;bottom:-5%;height:5%;width:100%;visibility:hidden}\n.bespoke-overview .bespoke-slide[aria-selected]{border:0.25ex solid #bbdefb}\n.bespoke-overview .bespoke-bullet {opacity:1}\n/* ensure current slide is on top when exiting overview */\n.bespoke-active{z-index:1}";
+  var css = ".bespoke-overview.bespoke-parent{pointer-events:auto}\n.bespoke-overview *:not(img){pointer-events:none}\n.bespoke-overview .bespoke-slide{opacity:1;cursor:pointer;pointer-events:auto}\n.bespoke-overview .bespoke-slide[aria-selected]{outline:0.4vw solid #cfd8dc;outline-offset:-0.2vw}\n.bespoke-overview .bespoke-bullet {opacity:1}\n.bespoke-active{z-index:1}\n";
   insertCss(css, { prepend: true });
 
   return function(deck) {
