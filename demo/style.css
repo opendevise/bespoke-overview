@@ -51,7 +51,7 @@ p {
   height: 100vh;
 }
 
-.bespoke-parent > *:not(.bespoke-slide) {
+.bespoke-parent > :not(.bespoke-slide) {
   pointer-events: none;
 }
 

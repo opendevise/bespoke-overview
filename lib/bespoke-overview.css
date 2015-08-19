@@ -1,5 +1,5 @@
 .bespoke-overview.bespoke-parent{pointer-events:auto}
-.bespoke-overview *:not(img){pointer-events:none}
+.bespoke-overview :not(img){pointer-events:none}
 .bespoke-overview .bespoke-slide{opacity:1;cursor:pointer;pointer-events:auto}
 .bespoke-overview .bespoke-slide[aria-selected]{outline:0.4vw solid #cfd8dc;outline-offset:-0.2vw}
 .bespoke-overview .bespoke-bullet {opacity:1}
