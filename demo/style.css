@@ -39,6 +39,7 @@ p {
 
 .bespoke-parent {
   pointer-events: none;
+  /* IMPORTANT don't put overflow on other wrapper elements */
   overflow: hidden;
 }
 
