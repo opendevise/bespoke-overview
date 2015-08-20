@@ -23,7 +23,6 @@ module.exports = function(opts) {
     overviewActive = false,
     cols = typeof opts.cols !== 'undefined' ? parseInt(opts.cols) : 3,
     margin = typeof opts.margin !== 'undefined' ? parseFloat(opts.margin) : 10,
-    counter = !!opts.counter,
     getTransformScaleFactor = function(element) {
       return element.getBoundingClientRect().width / element.offsetWidth;
     },
@@ -108,7 +107,7 @@ module.exports = function(opts) {
 
       // QUESTION should we add class to html or body element instead?
       parent.classList.add(overviewClassName);
-      if (counter) parent.classList.add(overviewCounterClassName);
+      if (!!opts.counter) parent.classList.add(overviewCounterClassName);
       // NOTE we need fine-grained control over scrollbar, so override CSS
       parent.style.overflowY = 'scroll';
       // NOTE supported in Chrome by enabling smooth scrolling in chrome://flags
@@ -189,7 +188,7 @@ module.exports = function(opts) {
         slide.removeEventListener('click', onOverviewClicked, false);
       });
       parent.classList.remove(overviewClassName);
-      if (counter) parent.classList.remove(overviewCounterClassName);
+      if (!!opts.counter) parent.classList.remove(overviewCounterClassName);
       deck.slides[focusedSlideIndex].removeAttribute('aria-selected');
       overviewActive = false;
     },
@@ -216,6 +215,7 @@ module.exports = function(opts) {
     document.addEventListener('keydown', keydownHandler, false);
     deck.on('next', navigate.bind(null, 1));
     deck.on('prev', navigate.bind(null, -1));
+    if (!!opts.start) activateOverview();
   };
 };
 
