@@ -11,16 +11,19 @@
 var insertCss = _dereq_('insert-css');
 
 module.exports = function(opts) {
-  var css = ".bespoke-overview.bespoke-parent{pointer-events:auto}\n.bespoke-overview :not(img){pointer-events:none}\n.bespoke-overview .bespoke-slide{opacity:1;visibility:visible;cursor:pointer;pointer-events:auto}\n.bespoke-overview .bespoke-slide[aria-selected]{outline:0.4vw solid #cfd8dc;outline-offset:-0.2vw;-moz-outline-radius:0.2vw}\n.bespoke-overview .bespoke-bullet {opacity:1}\n.bespoke-overview .bespoke-overflow{position:absolute;top:100%;left:0;height:0.5px;width:100%}\n/* TODO change the following rule to .bespoke-transition .bespoke-active once the class is enabled */\n.bespoke-active{z-index:1}";
+  var css = ".bespoke-overview.bespoke-parent{pointer-events:auto}\n.bespoke-overview :not(img){pointer-events:none}\n.bespoke-overview .bespoke-slide{opacity:1;visibility:visible;cursor:pointer;pointer-events:auto}\n.bespoke-overview .bespoke-slide[aria-selected]{outline:0.4vw solid #cfd8dc;outline-offset:-0.2vw;-moz-outline-radius:0.2vw}\n.bespoke-overview .bespoke-bullet {opacity:1}\n.bespoke-overview .bespoke-overflow{position:absolute;top:100%;left:0;height:0.5px;width:100%}\n.bespoke-overview-counter{counter-reset:overview-slide}\n.bespoke-overview-counter .bespoke-slide::after{counter-increment:overview-slide;content:counter(overview-slide);position:absolute;right:0.75em;bottom:0.5em;font-size:1.25rem;line-height:1.25}\n/* TODO change the following rule to .bespoke-transition .bespoke-active once the class is enabled */\n.bespoke-active{z-index:1}";
   insertCss(css, { prepend: true });
 
   return function(deck) {
+    opts = typeof opts === 'object' ? opts : {};
     var KEYCODE = { o: 79, enter: 13, esc: 27 },
     overviewClassName = 'bespoke-overview',
+    overviewCounterClassName = 'bespoke-overview-counter',
     focusedSlideIndex = 0,
     overviewActive = false,
-    cols = typeof opts !== 'undefined' && typeof opts.cols !== 'undefined' ? parseInt(opts.cols) : 3,
-    margin = typeof opts !== 'undefined' && typeof opts.margin !== 'undefined' ? parseFloat(opts.margin) : 10,
+    cols = typeof opts.cols !== 'undefined' ? parseInt(opts.cols) : 3,
+    margin = typeof opts.margin !== 'undefined' ? parseFloat(opts.margin) : 10,
+    counter = !!opts.counter,
     getTransformScaleFactor = function(element) {
       return element.getBoundingClientRect().width / element.offsetWidth;
     },
@@ -105,6 +108,7 @@ module.exports = function(opts) {
 
       // QUESTION should we add class to html or body element instead?
       parent.classList.add(overviewClassName);
+      if (counter) parent.classList.add(overviewCounterClassName);
       // NOTE we need fine-grained control over scrollbar, so override CSS
       parent.style.overflowY = 'scroll';
       // NOTE supported in Chrome by enabling smooth scrolling in chrome://flags
@@ -185,6 +189,7 @@ module.exports = function(opts) {
         slide.removeEventListener('click', onOverviewClicked, false);
       });
       parent.classList.remove(overviewClassName);
+      if (counter) parent.classList.remove(overviewCounterClassName);
       deck.slides[focusedSlideIndex].removeAttribute('aria-selected');
       overviewActive = false;
     },
