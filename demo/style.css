@@ -1,4 +1,4 @@
-* {
+*, ::before, ::after {
   -moz-box-sizing: inherit;
        box-sizing: inherit;
 }
