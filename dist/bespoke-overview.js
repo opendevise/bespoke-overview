@@ -11,7 +11,7 @@
 var insertCss = _dereq_('insert-css');
 
 module.exports = function(opts) {
-  var css = ".bespoke-overview.bespoke-parent{pointer-events:auto}\n.bespoke-overview :not(img){pointer-events:none}\n.bespoke-overview .bespoke-slide{opacity:1;cursor:pointer;pointer-events:auto}\n.bespoke-overview .bespoke-slide[aria-selected]{outline:0.4vw solid #cfd8dc;outline-offset:-0.2vw}\n.bespoke-overview .bespoke-bullet {opacity:1}\n.bespoke-overview .bespoke-overflow{position:absolute;top:100%;left:0;height:0.5px;width:100%}\n/* TODO change the following rule to .bespoke-transition .bespoke-active once the class is enabled */\n.bespoke-active{z-index:1}";
+  var css = ".bespoke-overview.bespoke-parent{pointer-events:auto}\n.bespoke-overview :not(img){pointer-events:none}\n.bespoke-overview .bespoke-slide{opacity:1;cursor:pointer;pointer-events:auto}\n.bespoke-overview .bespoke-slide[aria-selected]{outline:0.4vw solid #cfd8dc;outline-offset:-0.2vw;-moz-outline-radius:0.2vw}\n.bespoke-overview .bespoke-bullet {opacity:1}\n.bespoke-overview .bespoke-overflow{position:absolute;top:100%;left:0;height:0.5px;width:100%}\n/* TODO change the following rule to .bespoke-transition .bespoke-active once the class is enabled */\n.bespoke-active{z-index:1}";
   insertCss(css, { prepend: true });
 
   return function(deck) {
