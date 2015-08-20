@@ -201,8 +201,13 @@ module.exports = function(opts) {
           if (isOverviewActive() && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) exitOverview();
           break;
       }
+    },
+    resetInitialScroll = function(e) {
+      window.removeEventListener('load', resetInitialScroll, false);
+      deck.parent.scrollTop = 0;
     };
 
+    window.addEventListener('load', resetInitialScroll, false);
     document.addEventListener('keydown', keydownHandler, false);
     deck.on('next', navigate.bind(null, 1));
     deck.on('prev', navigate.bind(null, -1));
