@@ -51,7 +51,8 @@ p {
   height: 100vh;
 }
 
-.bespoke-parent > :not(.bespoke-slide) {
+.bespoke-parent > :not(.bespoke-slide),
+.bespoke-slide {
   pointer-events: none;
 }
 
@@ -91,8 +92,6 @@ p {
 .bespoke-active {
   pointer-events: auto;
   opacity: 1;
-  /* Chrome requires z-index to be set on active slide; Firefox doesn't */
-  z-index: 1;
 }
 
 /* Use only this declaration to disable transitions in and out of overview */
