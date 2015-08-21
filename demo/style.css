@@ -105,14 +105,14 @@ p {
 }
 */
 
-.bespoke-overview-in .bespoke-slide {
+.bespoke-overview-to .bespoke-slide {
   -webkit-transition: transform 0.5s ease-out, opacity 0.5s ease-in-out 0.5s;
      -moz-transition: transform 0.5s ease-out, opacity 0.5s ease-in-out 0.5s;
        -o-transition: transform 0.5s ease-out, opacity 0.5s ease-in-out 0.5s;
           transition: transform 0.5s ease-out, opacity 0.5s ease-in-out 0.5s;
 }
 
-.bespoke-overview-out .bespoke-slide {
+.bespoke-overview-from .bespoke-slide {
   -webkit-transition: transform 0.5s ease-out 0.15s, opacity 0.15s ease-in-out;
      -moz-transition: transform 0.5s ease-out 0.15s, opacity 0.15s ease-in-out;
        -o-transition: transform 0.5s ease-out 0.15s, opacity 0.15s ease-in-out;

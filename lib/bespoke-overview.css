@@ -6,4 +6,4 @@
 .bespoke-overview-counter{counter-reset:overview-slide}
 .bespoke-overview-counter .bespoke-slide::after{counter-increment:overview-slide;content:counter(overview-slide);position:absolute;right:0.75em;bottom:0.5em;font-size:1.25rem;line-height:1.25}
 /* z-index setting only works when slides are siblings */
-.bespoke-overview-in .bespoke-active,.bespoke-overview-out .bespoke-active{z-index:1}
+.bespoke-overview-to .bespoke-active,.bespoke-overview-from .bespoke-active{z-index:1}
