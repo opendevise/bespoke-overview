@@ -7,22 +7,28 @@
  */
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var o;"undefined"!=typeof window?o=window:"undefined"!=typeof global?o=global:"undefined"!=typeof self&&(o=self);var n=o;n=n.bespoke||(n.bespoke={}),n=n.plugins||(n.plugins={}),n.overview=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-
-var insertCss = _dereq_('insert-css');
-
 module.exports = function(opts) {
   var css = ".bespoke-overview.bespoke-parent{pointer-events:auto}\n.bespoke-overview :not(img){pointer-events:none}\n.bespoke-overview .bespoke-slide{opacity:1;visibility:visible;cursor:pointer;pointer-events:auto}\n.bespoke-overview .bespoke-slide[aria-selected]{outline:0.4vw solid #cfd8dc;outline-offset:-0.2vw;-moz-outline-radius:0.2vw}\n.bespoke-overview .bespoke-bullet {opacity:1}\n.bespoke-overview .bespoke-overflow{position:absolute;top:100%;left:0;height:0.5px;width:100%}\n.bespoke-overview-counter{counter-reset:overview-slide}\n.bespoke-overview-counter .bespoke-slide::after{counter-increment:overview-slide;content:counter(overview-slide);position:absolute;right:0.75em;bottom:0.5em;font-size:1.25rem;line-height:1.25}\n/* TODO change the following rule to .bespoke-transition .bespoke-active once the class is enabled */\n.bespoke-active{z-index:1}";
-  insertCss(css, { prepend: true });
+  _dereq_('insert-css')(css, { prepend: true });
 
   return function(deck) {
     opts = typeof opts === 'object' ? opts : {};
     var KEYCODE = { o: 79, enter: 13, esc: 27 },
+    VENDOR_PREFIX = ['Webkit', 'Moz', 'ms'],
     overviewClassName = 'bespoke-overview',
     overviewCounterClassName = 'bespoke-overview-counter',
     focusedSlideIndex = 0,
     overviewActive = false,
     cols = typeof opts.cols !== 'undefined' ? parseInt(opts.cols) : 3,
     margin = typeof opts.margin !== 'undefined' ? parseFloat(opts.margin) : 10,
+    getTransformPropertyName = function(element) {
+      if ('transform' in element.style) return 'transform';
+      for (var i = 0, len = VENDOR_PREFIX.length; i < len; i++) {
+        var vendorPropertyName = VENDOR_PREFIX[i] + 'Transform';
+        if (vendorPropertyName in element.style) return vendorPropertyName;
+      }
+      return 'transform';
+    },
     getTransformScaleFactor = function(element) {
       return element.getBoundingClientRect().width / element.offsetWidth;
     },
@@ -141,8 +147,7 @@ module.exports = function(opts) {
         // NOTE drop exponential notation in near-zero numbers (since it breaks older WebKit engines)
         if (x.toString().indexOf('e-') !== -1) x = 0;
         if (y.toString().indexOf('e-') !== -1) y = 0;
-        // TODO use CSS prefixes for -webkit and maybe -ms
-        slide.style.transform = 'translate(' + x + 'px, ' + y + 'px) scale(' + scale + ')';
+        slide.style[getTransformPropertyName(slide)] = 'translate(' + x + 'px, ' + y + 'px) scale(' + scale + ')';
         // HACK for some reason, must kick bottom margin using 0% or else Chrome screws up layout
         slide.style.marginBottom = '0%';
         if (col === (cols - 1)) {
@@ -186,7 +191,7 @@ module.exports = function(opts) {
       parent.style.overflowY = '';
       parent.scrollTop = 0;
       deck.slides.forEach(function(slide) {
-        slide.style.transform = '';
+        slide.style[getTransformPropertyName(slide)] = '';
         slide.style.marginBottom = '';
         slide.removeEventListener('click', onOverviewClicked, false);
       });
