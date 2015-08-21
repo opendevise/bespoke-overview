@@ -182,9 +182,7 @@ module.exports = function(opts) {
       });
       // NOTE add margin to last slide to leave gap below last row; doesn't work in Firefox
       lastSlide.style.marginBottom = scaledMargin + 'px';
-      deck.slides.forEach(function(slide) {
-        slide.addEventListener('click', onOverviewClick, false);
-      });
+      deck.slides.forEach(function(slide) { slide.addEventListener('click', onOverviewClick, false); });
       // TODO add option for scrollIntoView position (top, bottom, disabled)
       if (focusedSlideIndex >= cols) {
         if (transformTransitions(lastSlide)) {
