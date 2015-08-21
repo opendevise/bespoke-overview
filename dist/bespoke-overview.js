@@ -107,12 +107,12 @@ module.exports = function(opts) {
         focusedSlide = deck.slides[focusedSlideIndex = deck.slide()],
         scaleParent = parent.querySelector('.bespoke-scale-parent'),
         baseScale,
-        isZoomed = false;
+        zoomed = false;
       if (scaleParent) {
         baseScale = getTransformScaleFactor(scaleParent);
       }
       else if ((baseScale = getZoomFactor(lastSlide))) {
-        isZoomed = true;
+        zoomed = true;
       }
       else {
         baseScale = 1;
@@ -151,7 +151,7 @@ module.exports = function(opts) {
         slideWidth = lastSlide.offsetWidth,
         slideHeight = lastSlide.offsetHeight,
         scale = (deckWidth - totalGutter) / cols / slideWidth,
-        scrollbarScale = isZoomed ? 1 : baseScale,
+        scrollbarScale = zoomed ? 1 : baseScale,
         slideX = (deckWidth - slideWidth) * 0.5 + scrollbarWidth * scrollbarScale,
         slideY = (deckHeight - slideHeight) * 0.5,
         // adjust for transform origin being center of slide
