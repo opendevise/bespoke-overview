@@ -75,11 +75,10 @@ p {
           flex-direction: column;
   /* QUESTION should we apply padding to inner content container instead? */
   padding: 1em;
-  /* NOTE transition between slides, going out of slide overview */
-  -webkit-transition: transform 0.3s ease, opacity 0.3s ease;
-     -moz-transition: transform 0.3s ease, opacity 0.3s ease;
-       -o-transition: transform 0.3s ease, opacity 0.3s ease;
-          transition: transform 0.3s ease, opacity 0.3s ease;
+  -webkit-transition: opacity 0.3s ease;
+     -moz-transition: opacity 0.3s ease;
+       -o-transition: opacity 0.3s ease;
+          transition: opacity 0.3s ease;
 }
 
 .bespoke-inactive {
@@ -94,10 +93,26 @@ p {
   opacity: 1;
 }
 
-/* custom transition (for now, only when entering overview) */
+/* Use only this declaration to disable transitions in and out of overview */
+/*
 .bespoke-overview .bespoke-slide {
-  -webkit-transition: transform 0.3s ease-out, opacity 0.8s ease-in-out;
-     -moz-transition: transform 0.3s ease-out, opacity 0.8s ease-in-out;
-       -o-transition: transform 0.3s ease-out, opacity 0.8s ease-in-out;
-          transition: transform 0.3s ease-out, opacity 0.8s ease-in-out;
+  -webkit-transition: none;
+     -moz-transition: none;
+       -o-transition: none;
+          transition: none;
+}
+*/
+
+.bespoke-overview-in .bespoke-slide {
+  -webkit-transition: transform 0.5s ease-out, opacity 0.5s ease-in-out 0.5s;
+     -moz-transition: transform 0.5s ease-out, opacity 0.5s ease-in-out 0.5s;
+       -o-transition: transform 0.5s ease-out, opacity 0.5s ease-in-out 0.5s;
+          transition: transform 0.5s ease-out, opacity 0.5s ease-in-out 0.5s;
+}
+
+.bespoke-overview-out .bespoke-slide {
+  -webkit-transition: transform 0.5s ease-out 0.15s, opacity 0.15s ease-in-out;
+     -moz-transition: transform 0.5s ease-out 0.15s, opacity 0.15s ease-in-out;
+       -o-transition: transform 0.5s ease-out 0.15s, opacity 0.15s ease-in-out;
+          transition: transform 0.5s ease-out 0.15s, opacity 0.15s ease-in-out;
 }

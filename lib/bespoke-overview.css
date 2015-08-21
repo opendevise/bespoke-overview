@@ -3,8 +3,7 @@
 .bespoke-overview .bespoke-slide{opacity:1;visibility:visible;cursor:pointer;pointer-events:auto}
 .bespoke-overview .bespoke-slide[aria-selected]{outline:0.4vw solid #cfd8dc;outline-offset:-0.2vw;-moz-outline-radius:0.2vw}
 .bespoke-overview .bespoke-bullet {opacity:1}
-.bespoke-overview .bespoke-overflow{position:absolute;top:100%;left:0;height:0.5px;width:100%}
 .bespoke-overview-counter{counter-reset:overview-slide}
 .bespoke-overview-counter .bespoke-slide::after{counter-increment:overview-slide;content:counter(overview-slide);position:absolute;right:0.75em;bottom:0.5em;font-size:1.25rem;line-height:1.25}
-/* TODO change the following rule to .bespoke-transition .bespoke-active once the class is enabled */
-.bespoke-active{z-index:1}
+/* z-index setting only works when slides are siblings */
+.bespoke-overview-in .bespoke-active,.bespoke-overview-out .bespoke-active{z-index:1}

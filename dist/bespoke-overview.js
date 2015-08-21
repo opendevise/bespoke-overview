@@ -8,26 +8,26 @@
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var o;"undefined"!=typeof window?o=window:"undefined"!=typeof global?o=global:"undefined"!=typeof self&&(o=self);var n=o;n=n.bespoke||(n.bespoke={}),n=n.plugins||(n.plugins={}),n.overview=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 module.exports = function(opts) {
-  var css = ".bespoke-overview.bespoke-parent{pointer-events:auto}\n.bespoke-overview :not(img){pointer-events:none}\n.bespoke-overview .bespoke-slide{opacity:1;visibility:visible;cursor:pointer;pointer-events:auto}\n.bespoke-overview .bespoke-slide[aria-selected]{outline:0.4vw solid #cfd8dc;outline-offset:-0.2vw;-moz-outline-radius:0.2vw}\n.bespoke-overview .bespoke-bullet {opacity:1}\n.bespoke-overview .bespoke-overflow{position:absolute;top:100%;left:0;height:0.5px;width:100%}\n.bespoke-overview-counter{counter-reset:overview-slide}\n.bespoke-overview-counter .bespoke-slide::after{counter-increment:overview-slide;content:counter(overview-slide);position:absolute;right:0.75em;bottom:0.5em;font-size:1.25rem;line-height:1.25}\n/* TODO change the following rule to .bespoke-transition .bespoke-active once the class is enabled */\n.bespoke-active{z-index:1}";
+  var css = ".bespoke-overview.bespoke-parent{pointer-events:auto}\n.bespoke-overview :not(img){pointer-events:none}\n.bespoke-overview .bespoke-slide{opacity:1;visibility:visible;cursor:pointer;pointer-events:auto}\n.bespoke-overview .bespoke-slide[aria-selected]{outline:0.4vw solid #cfd8dc;outline-offset:-0.2vw;-moz-outline-radius:0.2vw}\n.bespoke-overview .bespoke-bullet {opacity:1}\n.bespoke-overview-counter{counter-reset:overview-slide}\n.bespoke-overview-counter .bespoke-slide::after{counter-increment:overview-slide;content:counter(overview-slide);position:absolute;right:0.75em;bottom:0.5em;font-size:1.25rem;line-height:1.25}\n/* z-index setting only works when slides are siblings */\n.bespoke-overview-in .bespoke-active,.bespoke-overview-out .bespoke-active{z-index:1}";
   _dereq_('insert-css')(css, { prepend: true });
-
   return function(deck) {
     opts = typeof opts === 'object' ? opts : {};
     var KEYCODE = { o: 79, enter: 13, esc: 27 },
+    CSV_RE = new RegExp(', *'),
     VENDOR_PREFIX = ['Webkit', 'Moz', 'ms'],
-    overviewClassName = 'bespoke-overview',
-    overviewCounterClassName = 'bespoke-overview-counter',
     focusedSlideIndex = 0,
     overviewActive = false,
     cols = typeof opts.cols !== 'undefined' ? parseInt(opts.cols) : 3,
     margin = typeof opts.margin !== 'undefined' ? parseFloat(opts.margin) : 10,
-    getTransformPropertyName = function(element) {
-      if ('transform' in element.style) return 'transform';
+    afterTransition = null,
+    getStyleProperty = function(element, propertyName) {
+      if (propertyName in element.style) return propertyName;
+      var properPropertyName = propertyName.charAt(0) + propertyName.substr(1);
       for (var i = 0, len = VENDOR_PREFIX.length; i < len; i++) {
-        var vendorPropertyName = VENDOR_PREFIX[i] + 'Transform';
+        var vendorPropertyName = VENDOR_PREFIX[i] + properPropertyName;
         if (vendorPropertyName in element.style) return vendorPropertyName;
       }
-      return 'transform';
+      return propertyName;
     },
     getTransformScaleFactor = function(element) {
       return element.getBoundingClientRect().width / element.offsetWidth;
@@ -38,11 +38,33 @@ module.exports = function(opts) {
         if (zoom.length > 0) return parseFloat(zoom);
       }
     },
-    hasTransition = function(element) {
-      // TODO use CSS prefixes for -webkit and maybe -ms
-      return getComputedStyle(element).transitionDuration !== '0s';
+    transformTransitions = function(element) {
+      var style = getComputedStyle(element);
+      var transitionProperty = style[getStyleProperty(element, 'transitionProperty')];
+      if (!transitionProperty || transitionProperty === 'none') return false;
+      // NOTE beyond this point, we assume we'll get compliant values from style
+      var idx = transitionProperty.split(CSV_RE).indexOf('transform');
+      if (idx === -1) return false;
+      var transformDuration = style[getStyleProperty(element, 'transitionDuration')].split(CSV_RE)[idx];
+      if (transformDuration !== '0s') return true;
+      var transformDelay = style[getStyleProperty(element, 'transitionDelay')].split(CSV_RE)[idx];
+      return transformDelay !== '0s';
     },
-    onOverviewClicked = function(e) {
+    getNumTransitions = function(element) {
+      var style = getComputedStyle(element);
+      var transitionProperty = style[getStyleProperty(element, 'transitionProperty')];
+      if (!transitionProperty || transitionProperty === 'none') return 0;
+      // NOTE beyond this point, we assume we'll get compliant values from style
+      transitionProperty = transitionProperty.split(CSV_RE);
+      var transitionDuration = style[getStyleProperty(element, 'transitionDuration')].split(CSV_RE);
+      var transitionDelay = style[getStyleProperty(element, 'transitionDelay')].split(CSV_RE);
+      var num = transitionProperty.length; 
+      for (var i = 0, len = num; i < len; i++) {
+        if (transitionDuration[i] === '0s' && transitionDelay[i] === '0s') num -= 1;
+      }
+      return num;
+    },
+    onOverviewClick = function(e) {
       var selection = deck.slides.indexOf(e.currentTarget);
       if (selection !== -1) exitOverview(selection);
     },
@@ -77,18 +99,10 @@ module.exports = function(opts) {
         }
         return false;
       }
-      else {
-        return true;
-      }
-    },
-    scrollToSlide = function(e) {
-      if (e.propertyName === 'transform') {
-        deck.slides[focusedSlideIndex].scrollIntoView(true);
-        this.removeEventListener('transitionend', scrollToSlide, false);
-      }
     },
     activateOverview = function() {
       var parent = deck.parent,
+        parentClassList = parent.classList,
         lastSlide = deck.slides[deck.slides.length - 1],
         focusedSlide = deck.slides[focusedSlideIndex = deck.slide()],
         scaleParent = parent.querySelector('.bespoke-scale-parent'),
@@ -103,22 +117,31 @@ module.exports = function(opts) {
       else {
         baseScale = 1;
       }
-
-      // NOTE force the scrollbar to become visible using overflow content to work around issue in Chrome
-      //if (scaleParent && 'zoom' in parent.style) {
-      //  var overflow = document.createElement('div');
-      //  overflow.className = 'bespoke-overflow';
-      //  parent.appendChild(overflow);
-      //}
-
+      if (afterTransition) {
+        lastSlide.removeEventListener('transitionend', afterTransition, false);
+        parentClassList.remove('bespoke-overview-out');
+      }
       // QUESTION should we add class to html or body element instead?
-      parent.classList.add(overviewClassName);
-      if (!!opts.counter) parent.classList.add(overviewCounterClassName);
+      parentClassList.add('bespoke-overview');
+      if (!!opts.counter) parentClassList.add('bespoke-overview-counter');
+      parentClassList.add('bespoke-overview-in');
+      var transitions = getNumTransitions(lastSlide);
+      if (transitions > 0) {
+        lastSlide.addEventListener('transitionend', (afterTransition = function(e) {
+          if ((transitions -= 1) === 0) {
+            lastSlide.removeEventListener('transitionend', afterTransition, false);
+            afterTransition = null;
+            parentClassList.remove('bespoke-overview-in');
+          }
+        }), false);
+      }
+      else {
+        parentClassList.remove('bespoke-overview-in');
+      }
       // NOTE we need fine-grained control over scrollbar, so override CSS
       parent.style.overflowY = 'scroll';
       // NOTE supported in Chrome by enabling smooth scrolling in chrome://flags
       parent.style.scrollBehavior = 'smooth';
-
       var baseMargin = margin / baseScale,
         deckWidth = parent.clientWidth / baseScale,
         deckHeight = parent.clientHeight / baseScale,
@@ -139,7 +162,6 @@ module.exports = function(opts) {
         slideBoxHeight = slideHeight + scaledMargin,
         row = 0,
         col = 0;
-
       deck.slides.forEach(function(slide) {
         // NOTE we force the scrollbar to be visible in overview mode
         var x = (baseMargin + scrollbarWidth - slideX) + (col * slideBoxWidth * scale),
@@ -147,7 +169,7 @@ module.exports = function(opts) {
         // NOTE drop exponential notation in near-zero numbers (since it breaks older WebKit engines)
         if (x.toString().indexOf('e-') !== -1) x = 0;
         if (y.toString().indexOf('e-') !== -1) y = 0;
-        slide.style[getTransformPropertyName(slide)] = 'translate(' + x + 'px, ' + y + 'px) scale(' + scale + ')';
+        slide.style[getStyleProperty(slide, 'transform')] = 'translate(' + x + 'px, ' + y + 'px) scale(' + scale + ')';
         // HACK for some reason, must kick bottom margin using 0% or else Chrome screws up layout
         slide.style.marginBottom = '0%';
         if (col === (cols - 1)) {
@@ -158,19 +180,21 @@ module.exports = function(opts) {
           col += 1;
         }
       });
-
       // NOTE add margin to last slide to leave gap below last row; doesn't work in Firefox
       lastSlide.style.marginBottom = scaledMargin + 'px';
-
       deck.slides.forEach(function(slide) {
-        slide.addEventListener('click', onOverviewClicked, false);
+        slide.addEventListener('click', onOverviewClick, false);
       });
-
       // TODO add option for scrollIntoView position (top, bottom, disabled)
       if (focusedSlideIndex >= cols) {
-        if (hasTransition(lastSlide)) {
-          // QUESTION should use use scrollToSlide.bind(focusedSlide) instead?
-          lastSlide.addEventListener('transitionend', scrollToSlide, false);
+        if (transformTransitions(lastSlide)) {
+          // QUESTION should we wait until all transitions are complete before scrolling?
+          lastSlide.addEventListener('transitionend', function scrollToSlide(e) {
+            if (e.propertyName === 'transform') {
+              lastSlide.removeEventListener('transitionend', scrollToSlide, false);
+              deck.slides[focusedSlideIndex].scrollIntoView(true);
+            }
+          }, false);
         }
         else {
           focusedSlide.scrollIntoView(true);
@@ -179,31 +203,48 @@ module.exports = function(opts) {
       focusedSlide.setAttribute('aria-selected', true);
       overviewActive = true;
     },
+    // NOTE the order of operations in this method are critical; heavily impact smoothness of transition
     exitOverview = function(selection) {
       if (typeof selection === 'number' && selection !== focusedSlideIndex) deck.slide(selection);
-
-      // NOTE the order of operations are critical, heavily impact smoothness of transition
       var parent = deck.parent,
-        overflow = parent.querySelector('.bespoke-overflow');
-      if (overflow) parent.removeChild(overflow);
+        parentClassList = parent.classList,
+        lastSlide = deck.slides[deck.slides.length - 1];
       // NOTE remove scroll offset while in overview mode; causes slight jerk at start of transition
       parent.style.scrollBehavior = '';
       parent.style.overflowY = '';
       parent.scrollTop = 0;
       deck.slides.forEach(function(slide) {
-        slide.style[getTransformPropertyName(slide)] = '';
+        slide.style[getStyleProperty(slide, 'transform')] = '';
         slide.style.marginBottom = '';
-        slide.removeEventListener('click', onOverviewClicked, false);
+        slide.removeEventListener('click', onOverviewClick, false);
       });
-      parent.classList.remove(overviewClassName);
-      if (!!opts.counter) parent.classList.remove(overviewCounterClassName);
+      if (afterTransition) {
+        lastSlide.removeEventListener('transitionend', afterTransition, false);
+        parentClassList.remove('bespoke-overview-in');
+      }
+      parentClassList.add('bespoke-overview-out');
+      var transitions = getNumTransitions(lastSlide);
+      if (transitions > 0) {
+        lastSlide.addEventListener('transitionend', (afterTransition = function(e) {
+          if ((transitions -= 1) === 0) {
+            lastSlide.removeEventListener('transitionend', afterTransition, false);
+            afterTransition = null;
+            parentClassList.remove('bespoke-overview-out');
+          }
+        }), false);
+      }
+      else {
+        parentClassList.remove('bespoke-overview-out');
+      }
+      if (!!opts.counter) parentClassList.remove('bespoke-overview-counter');
+      parentClassList.remove('bespoke-overview');
       deck.slides[focusedSlideIndex].removeAttribute('aria-selected');
       overviewActive = false;
     },
     toggleOverview = function() {
       return isOverviewActive() ? exitOverview() : activateOverview();
     },
-    keydownHandler = function(e) {
+    onKeydown = function(e) {
       switch(e.which) {
         case KEYCODE.o:
         case KEYCODE.esc:
@@ -213,14 +254,12 @@ module.exports = function(opts) {
           if (isOverviewActive() && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) exitOverview();
           break;
       }
-    },
-    resetInitialScroll = function(e) {
-      window.removeEventListener('load', resetInitialScroll, false);
-      deck.parent.scrollTop = 0;
     };
-
-    window.addEventListener('load', resetInitialScroll, false);
-    document.addEventListener('keydown', keydownHandler, false);
+    window.addEventListener('load', function resetInitialScroll(e) {
+      window.removeEventListener('load', resetInitialScroll, false);
+      if (deck.parent.scrollTop !== 0) deck.parent.scrollTop = 0;
+    }, false);
+    document.addEventListener('keydown', onKeydown, false);
     deck.on('next', navigate.bind(null, 1));
     deck.on('prev', navigate.bind(null, -1));
     if (!!opts.start) activateOverview();
