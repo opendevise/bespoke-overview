@@ -20,7 +20,7 @@ For example, when using CommonJS modules:
 var bespoke = require('bespoke'),
   overview = require('bespoke-overview');
 
-bespoke.from('#presentation', [
+bespoke.from('.deck', [
   overview()
 ]);
 ```
@@ -28,7 +28,7 @@ bespoke.from('#presentation', [
 When using browser globals:
 
 ```js
-bespoke.from('#presentation', [
+bespoke.from('.deck', [
   bespoke.plugins.overview()
 ]);
 ```

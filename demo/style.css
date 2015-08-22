@@ -21,7 +21,7 @@ p {
   margin: 0.5em 0;
 }
 
-.presentation {
+.deck {
   font-size: 2em;
   line-height: 1.6;
   color: #303030;
@@ -31,9 +31,9 @@ p {
   font-kerning: normal;
 }
 
-/* Hide presentation and slide content until bespoke.js has added classes */
-.presentation:not(.bespoke-parent),
-.presentation section:not(.bespoke-slide) {
+/* Hide deck and slide content until bespoke.js has added classes */
+.deck:not(.bespoke-parent),
+.deck section:not(.bespoke-slide) {
   display: none;
 }
 

@@ -1,4 +1,4 @@
-var deck = bespoke.from('.presentation', [
+var deck = bespoke.from('.deck', [
   bespoke.plugins.classes(),
   bespoke.plugins.keys(),
   bespoke.plugins.touch(),
