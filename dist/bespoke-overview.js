@@ -128,8 +128,8 @@ module.exports = function(opts) {
       var transitions = getNumTransitions(lastSlide);
       if (transitions > 0) {
         lastSlide.addEventListener('transitionend', (afterTransition = function(e) {
-          if (e.target === lastSlide && (transitions -= 1) === 0) {
-            lastSlide.removeEventListener('transitionend', afterTransition, false);
+          if (e.target === this && (transitions -= 1) === 0) {
+            this.removeEventListener('transitionend', afterTransition, false);
             afterTransition = null;
             parentClassList.remove('bespoke-overview-to');
           }
@@ -188,9 +188,9 @@ module.exports = function(opts) {
         if (hasTransformTransition(lastSlide)) {
           // QUESTION should we wait until all transitions are complete before scrolling?
           lastSlide.addEventListener('transitionend', function scrollToSlide(e) {
-            if (e.target === lastSlide && e.propertyName === 'transform') {
-              lastSlide.removeEventListener('transitionend', scrollToSlide, false);
-              deck.slides[focusedSlideIndex].scrollIntoView(true);
+            if (e.target === this && e.propertyName === 'transform') {
+              this.removeEventListener('transitionend', scrollToSlide, false);
+              focusedSlide.scrollIntoView(true);
             }
           }, false);
         }
@@ -224,8 +224,8 @@ module.exports = function(opts) {
       var transitions = getNumTransitions(lastSlide);
       if (transitions > 0) {
         lastSlide.addEventListener('transitionend', (afterTransition = function(e) {
-          if (e.target === lastSlide && (transitions -= 1) === 0) {
-            lastSlide.removeEventListener('transitionend', afterTransition, false);
+          if (e.target === this && (transitions -= 1) === 0) {
+            this.removeEventListener('transitionend', afterTransition, false);
             afterTransition = null;
             parentClassList.remove('bespoke-overview-from');
           }
