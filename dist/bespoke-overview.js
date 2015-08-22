@@ -8,18 +8,17 @@
 
 !function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var o;"undefined"!=typeof window?o=window:"undefined"!=typeof global?o=global:"undefined"!=typeof self&&(o=self);var n=o;n=n.bespoke||(n.bespoke={}),n=n.plugins||(n.plugins={}),n.overview=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 module.exports = function(opts) {
-  var css = ".bespoke-overview.bespoke-parent{pointer-events:auto}\n.bespoke-overview :not(img){pointer-events:none}\n.bespoke-overview .bespoke-slide{opacity:1;visibility:visible;cursor:pointer;pointer-events:auto}\n.bespoke-overview .bespoke-slide[aria-selected]{outline:0.4vw solid #cfd8dc;outline-offset:-0.2vw;-moz-outline-radius:0.2vw}\n.bespoke-overview .bespoke-bullet {opacity:1}\n.bespoke-overview-counter{counter-reset:overview-slide}\n.bespoke-overview-counter .bespoke-slide::after{counter-increment:overview-slide;content:counter(overview-slide);position:absolute;right:0.75em;bottom:0.5em;font-size:1.25rem;line-height:1.25}\n/* z-index setting only works when slides are siblings */\n.bespoke-overview-to .bespoke-active,.bespoke-overview-from .bespoke-active{z-index:1}";
+  var css = ".bespoke-overview.bespoke-parent{pointer-events:auto}\n.bespoke-overview :not(img){pointer-events:none}\n.bespoke-overview .bespoke-slide{opacity:1;visibility:visible;cursor:pointer;pointer-events:auto}\n.bespoke-overview .bespoke-active{outline:0.4vw solid #cfd8dc;outline-offset:-0.2vw;-moz-outline-radius:0.2vw}\n.bespoke-overview .bespoke-bullet{opacity:1}\n.bespoke-overview-counter{counter-reset:overview-slide}\n.bespoke-overview-counter .bespoke-slide::after{counter-increment:overview-slide;content:counter(overview-slide);position:absolute;right:0.75em;bottom:0.5em;font-size:1.25rem;line-height:1.25}\n/* z-index setting only works when slides are siblings */\n.bespoke-overview-to .bespoke-active,.bespoke-overview-from .bespoke-active{z-index:1}";
   _dereq_('insert-css')(css, { prepend: true });
   return function(deck) {
     opts = typeof opts === 'object' ? opts : {};
     var KEYCODE = { o: 79, enter: 13, esc: 27 },
     CSV_RE = new RegExp(', *'),
     VENDOR_PREFIX = ['Webkit', 'Moz', 'ms'],
-    focusedSlideIndex = 0,
-    overviewActive = false,
     cols = typeof opts.cols !== 'undefined' ? parseInt(opts.cols) : 3,
     margin = typeof opts.margin !== 'undefined' ? parseFloat(opts.margin) : 10,
     afterTransition = null,
+    overviewActive = false,
     getStyleProperty = function(element, name) {
       if (name in element.style) return name;
       var properName = name.charAt(0) + name.substr(1);
@@ -64,47 +63,45 @@ module.exports = function(opts) {
       }
       return num;
     },
-    onOverviewClick = function(e) {
-      var selection = deck.slides.indexOf(e.currentTarget);
-      if (selection !== -1) exitOverview(selection);
+    onSlideClick = function(e) {
+      exitOverview(deck.slides.indexOf(this));
     },
-    isOverviewActive = function() {
-      return overviewActive;
-    },
-    navigate = function(step) {
-      if (isOverviewActive()) {
-        // detect boundary
-        if ((step === -1 && focusedSlideIndex === 0) ||
-            (step === 1 && focusedSlideIndex + 1 === deck.slides.length)) {
-          return false;
-        }
-        var focusedSlide = deck.slides[focusedSlideIndex];
-        focusedSlide.removeAttribute('aria-selected');
-        focusedSlide = deck.slides[focusedSlideIndex += step];
-        deck.slide(focusedSlideIndex);
-        focusedSlide.setAttribute('aria-selected', true);
-        // TODO use a smarter scrollTo that only scrolls if necessary
-        if (focusedSlideIndex < cols) {
-          if (deck.parent.scrollTop > 0) {
-            if (deck.parent.scrollTo) {
-              deck.parent.scrollTo(0, 0);
-            }
-            else {
-              deck.parent.scrollTop = 0;
-            }
-          }
-        }
-        else {
-          focusedSlide.scrollIntoView(true);
-        }
+    onNavigate = function(offset, slideEvent) {
+      if (overviewActive) {
+        var targetIndex = slideEvent.index + offset;
+        // IMPORTANT must navigate using deck.slide to step over bullets
+        if (targetIndex > -1 && targetIndex < deck.slides.length) deck.slide(targetIndex);
         return false;
+      }
+    },
+    // NOTE false return value only prevents event from propagating to *subsequent* plugins
+    onActivate = function(slideEvent) {
+      if ('stopPropagation' in slideEvent) {
+        return !slideEvent.stopPropagation;
+      }
+      else if (overviewActive) {
+        scrollSlideIntoView(slideEvent);
+        return false;
+      }
+    },
+    // TODO augment logic to only scroll if any part of slide is outside viewport
+    scrollSlideIntoView = function(slideEvent) {
+      if (typeof slideEvent === 'undefined') {
+        slideEvent = { index: deck.slide(), slide: deck.slides[deck.slide()] };
+      }
+      if (slideEvent.index < cols) {
+        deck.parent.scrollTop = 0;
+      }
+      else {
+        slideEvent.slide.scrollIntoView(true);
       }
     },
     activateOverview = function() {
       var parent = deck.parent,
         parentClassList = parent.classList,
         lastSlide = deck.slides[deck.slides.length - 1],
-        focusedSlide = deck.slides[focusedSlideIndex = deck.slide()],
+        activeSlideIndex = deck.slide(),
+        activeSlide = deck.slides[activeSlideIndex],
         scaleParent = parent.querySelector('.bespoke-scale-parent'),
         baseScale,
         zoomed = false;
@@ -121,8 +118,10 @@ module.exports = function(opts) {
         lastSlide.removeEventListener('transitionend', afterTransition, false);
         parentClassList.remove('bespoke-overview-from');
       }
-      // QUESTION should we add class to html or body element instead?
+      // NOTE reselect active slide to emulate selection from overview
+      deck.slide(activeSlideIndex, { stopPropagation: true });
       parentClassList.add('bespoke-overview');
+      overviewActive = true;
       if (!!opts.counter) parentClassList.add('bespoke-overview-counter');
       parentClassList.add('bespoke-overview-to');
       var transitions = getNumTransitions(lastSlide);
@@ -179,42 +178,41 @@ module.exports = function(opts) {
         else {
           col += 1;
         }
+        slide.addEventListener('click', onSlideClick, false);
       });
       // NOTE add margin to last slide to leave gap below last row; doesn't work in Firefox
       lastSlide.style.marginBottom = scaledMargin + 'px';
-      deck.slides.forEach(function(slide) { slide.addEventListener('click', onOverviewClick, false); });
       // TODO add option for scrollIntoView position (top, bottom, disabled)
-      if (focusedSlideIndex >= cols) {
+      if (activeSlideIndex >= cols) {
         if (hasTransformTransition(lastSlide)) {
           // QUESTION should we wait until all transitions are complete before scrolling?
           lastSlide.addEventListener('transitionend', function scrollToSlide(e) {
             if (e.target === this && e.propertyName === 'transform') {
               this.removeEventListener('transitionend', scrollToSlide, false);
-              focusedSlide.scrollIntoView(true);
+              activeSlide.scrollIntoView(true);
             }
           }, false);
         }
         else {
-          focusedSlide.scrollIntoView(true);
+          activeSlide.scrollIntoView(true);
         }
       }
-      focusedSlide.setAttribute('aria-selected', true);
-      overviewActive = true;
     },
     // NOTE the order of operations in this method are critical; heavily impact smoothness of transition
     exitOverview = function(selection) {
-      if (typeof selection === 'number' && selection !== focusedSlideIndex) deck.slide(selection);
+      // NOTE activate selected slide or reselect active slide
+      deck.slide(typeof selection === 'number' ? selection : deck.slide(), { stopPropagation: false });
       var parent = deck.parent,
         parentClassList = parent.classList,
         lastSlide = deck.slides[deck.slides.length - 1];
-      // NOTE remove scroll offset while in overview mode; causes slight jerk at start of transition
+      // NOTE remove scrollbar and offset while in overview mode; causes slight jerk at start of transition
       parent.style.scrollBehavior = '';
       parent.style.overflowY = '';
       parent.scrollTop = 0;
       deck.slides.forEach(function(slide) {
         slide.style[getStyleProperty(slide, 'transform')] = '';
         slide.style.marginBottom = '';
-        slide.removeEventListener('click', onOverviewClick, false);
+        slide.removeEventListener('click', onSlideClick, false);
       });
       if (afterTransition) {
         lastSlide.removeEventListener('transitionend', afterTransition, false);
@@ -236,11 +234,10 @@ module.exports = function(opts) {
       }
       if (!!opts.counter) parentClassList.remove('bespoke-overview-counter');
       parentClassList.remove('bespoke-overview');
-      deck.slides[focusedSlideIndex].removeAttribute('aria-selected');
       overviewActive = false;
     },
     toggleOverview = function() {
-      return isOverviewActive() ? exitOverview() : activateOverview();
+      return overviewActive ? exitOverview() : activateOverview();
     },
     onKeydown = function(e) {
       switch(e.which) {
@@ -249,7 +246,7 @@ module.exports = function(opts) {
           if (!e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) toggleOverview();
           break;
         case KEYCODE.enter:
-          if (isOverviewActive() && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) exitOverview();
+          if (overviewActive && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) exitOverview();
           break;
       }
     };
@@ -258,8 +255,9 @@ module.exports = function(opts) {
       if (deck.parent.scrollTop !== 0) deck.parent.scrollTop = 0;
     }, false);
     document.addEventListener('keydown', onKeydown, false);
-    deck.on('next', navigate.bind(null, 1));
-    deck.on('prev', navigate.bind(null, -1));
+    deck.on('activate', onActivate);
+    deck.on('next', onNavigate.bind(null, 1));
+    deck.on('prev', onNavigate.bind(null, -1));
     if (!!opts.start) activateOverview();
   };
 };
