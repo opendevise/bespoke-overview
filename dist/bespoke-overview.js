@@ -17,8 +17,8 @@ module.exports = function(opts) {
     VENDOR_PREFIX = ['webkit', 'Moz', 'ms'],
     columns = (typeof opts.columns !== 'undefined' ? parseInt(opts.columns) : 3),
     margin = (typeof opts.margin !== 'undefined' ? parseFloat(opts.margin) : 10),
-    afterTransition = null,
     overviewActive = false,
+    afterTransition,
     getStyleProperty = function(element, name) {
       if (name in element.style) return name;
       var properName = name.charAt(0).toUpperCase() + name.substr(1);
@@ -91,10 +91,12 @@ module.exports = function(opts) {
         lastSlideIndex = slides.length - 1,
         activeSlideIndex = deck.slide(),
         sampleSlide = (activeSlideIndex > 0 ? slides[0] : slides[lastSlideIndex]),
+        transformProperty = getStyleProperty(sampleSlide, 'transform'),
         scaleParent = parent.querySelector('.bespoke-scale-parent'),
         headerHeight = 0,
         baseScale = 1,
-        baseZoom;
+        baseZoom,
+        numTransitions = 0;
       if (scaleParent) {
         baseScale = getTransformScaleFactor(scaleParent);
       }
@@ -120,35 +122,37 @@ module.exports = function(opts) {
         headerHeight = firstChild.offsetHeight;
         firstChild = null;
       }
-      // IMPORTANT we intentionally reselect active slide to deactivate behavior
-      deck.slide(activeSlideIndex, { stopPropagation: true });
-      parentClassList.add('bespoke-overview');
-      overviewActive = true;
-      if (!!opts.numbers) parentClassList.add('bespoke-overview-counter');
-      parentClassList.add('bespoke-overview-to');
-      var transitions = (lastSlideIndex > 0 ? getTransitionProperties(sampleSlide) :
-          (getTransitionProperties(sampleSlide).indexOf("transform") !== -1 ? ["transform"] : []));
-      var numTransitions = transitions.length;
-      if (numTransitions > 0) {
-        var activeTransitions = numTransitions;
-        sampleSlide.addEventListener('transitionend', (afterTransition = function(e) {
-          if (e.target === this && (activeTransitions -= 1) === 0) {
-            this.removeEventListener('transitionend', afterTransition, false);
-            afterTransition = null;
-            parentClassList.remove('bespoke-overview-to');
-            if (activeSlideIndex >= columns) {
-              slides[activeSlideIndex].scrollIntoView(true);
+      if (!overviewActive) {
+        // IMPORTANT we intentionally reselect active slide to deactivate behavior
+        deck.slide(activeSlideIndex, { stopPropagation: true });
+        parentClassList.add('bespoke-overview');
+        overviewActive = true;
+        if (!!opts.numbers) parentClassList.add('bespoke-overview-counter');
+        parentClassList.add('bespoke-overview-to');
+        var transitions = (lastSlideIndex > 0 ? getTransitionProperties(sampleSlide) :
+            (getTransitionProperties(sampleSlide).indexOf("transform") !== -1 ? ["transform"] : []));
+        numTransitions = transitions.length;
+        if (numTransitions > 0) {
+          var activeTransitions = numTransitions;
+          sampleSlide.addEventListener('transitionend', (afterTransition = function(e) {
+            if (e.target === this && (activeTransitions -= 1) === 0) {
+              this.removeEventListener('transitionend', afterTransition, false);
+              afterTransition = null;
+              parentClassList.remove('bespoke-overview-to');
+              if (activeSlideIndex >= columns) {
+                slides[activeSlideIndex].scrollIntoView(true);
+              }
             }
-          }
-        }), false);
+          }), false);
+        }
+        else {
+          parentClassList.remove('bespoke-overview-to');
+        }
+        // NOTE we need fine-grained control over scrollbar, so override CSS
+        parent.style.overflowY = 'scroll';
+        // NOTE smooth scrolling only supported in Firefox (at the time of this commit)
+        parent.style.scrollBehavior = 'smooth';
       }
-      else {
-        parentClassList.remove('bespoke-overview-to');
-      }
-      // NOTE we need fine-grained control over scrollbar, so override CSS
-      parent.style.overflowY = 'scroll';
-      // NOTE supported in Chrome by enabling smooth scrolling in chrome://flags
-      parent.style.scrollBehavior = 'smooth';
       var baseMargin = margin / baseScale,
         deckWidth = parent.clientWidth / baseScale,
         deckHeight = parent.clientHeight / baseScale,
@@ -169,8 +173,7 @@ module.exports = function(opts) {
         slideBoxWidth = slideWidth + scaledMargin,
         slideBoxHeight = slideHeight + scaledMargin,
         row = 0,
-        col = 0,
-        transformProperty = getStyleProperty(sampleSlide, 'transform');
+        col = 0;
       slides.forEach(function(slide) {
         // NOTE take scrollbar width into account since we force scrollbar to be visible
         var x = (baseMargin + scrollbarWidth - slideX) + (col * slideBoxWidth * scale),
@@ -257,6 +260,7 @@ module.exports = function(opts) {
       window.removeEventListener('load', resetInitialScroll, false);
       if (deck.parent.scrollTop !== 0) deck.parent.scrollTop = 0;
     }, false);
+    window.addEventListener('resize', activateOverview, false);
     document.addEventListener('keydown', onKeydown, false);
     deck.on('activate', onActivate);
     deck.on('next', onNavigate.bind(null, 1));
