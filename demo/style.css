@@ -117,3 +117,33 @@ p {
        -o-transition: transform 0.5s ease-in-out 0.05s, opacity 0.15s ease-in-out;
           transition: transform 0.5s ease-in-out 0.05s, opacity 0.15s ease-in-out;
 }
+
+/* Enable style and transitions on title element */
+.bespoke-title {
+  opacity: 0;
+  background-color: #efefef;
+  color: #606060;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #fefefe;
+  box-shadow: 0 1px 8px rgba(0,0,0,0.2);
+}
+
+.bespoke-overview .bespoke-title {
+  opacity: 1;
+}
+
+.bespoke-overview-to .bespoke-title {
+  visibility: visible;
+  -webkit-transition: opacity 0.5s ease-in-out 0.4s;
+     -moz-transition: opacity 0.5s ease-in-out 0.4s;
+       -o-transition: opacity 0.5s ease-in-out 0.4s;
+          transition: opacity 0.5s ease-in-out 0.4s;
+}
+
+.bespoke-overview-from .bespoke-title {
+  visibility: visible;
+  -webkit-transition: opacity 0.15s ease-in-out;
+     -moz-transition: opacity 0.15s ease-in-out;
+       -o-transition: opacity 0.15s ease-in-out;
+          transition: opacity 0.15s ease-in-out;
+}
