@@ -3,9 +3,9 @@
 .bespoke-overview .bespoke-slide{opacity:1;visibility:visible;cursor:pointer;pointer-events:auto}
 .bespoke-overview .bespoke-active{outline:0.4vw solid #cfd8dc;outline-offset:-0.2vw;-moz-outline-radius:0.2vw}
 .bespoke-overview .bespoke-bullet{opacity:1}
-.bespoke-overview-counter{counter-reset:overview-slide}
-.bespoke-overview-counter .bespoke-slide::after{counter-increment:overview-slide;content:counter(overview-slide);position:absolute;right:0.75em;bottom:0.5em;font-size:1.25rem;line-height:1.25}
+.bespoke-overview-counter{counter-reset:overview}
+.bespoke-overview-counter .bespoke-slide::after{counter-increment:overview;content:counter(overview);position:absolute;right:0.75em;bottom:0.5em;font-size:1.25rem;line-height:1.25}
 .bespoke-title{visibility:hidden;position:absolute;top:0;left:0;width:100vw;padding:10px 0 0 0;line-height:1.2;font-weight:bold;text-align:center}
 .bespoke-overview:not(.bespoke-overview-to) .bespoke-title{visibility:visible;pointer-events:auto}
-/* z-index setting only works when slides are siblings */
+/* z-index only works when slides are siblings */
 .bespoke-overview-to .bespoke-active,.bespoke-overview-from .bespoke-active{z-index:1}

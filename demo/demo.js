@@ -5,7 +5,7 @@ var deck = bespoke.from('.deck', [
   bespoke.plugins.scale(),
   //bespoke.plugins.scale('transform'),
   bespoke.plugins.overview()
-  //bespoke.plugins.overview({cols: 2, margin: 10, counter: true, start: true, title: true})
+  //bespoke.plugins.overview({columns: 2, margin: 10, autostart: true, title: true, numbers: true})
 ]);
 
 // expose API to other applications
