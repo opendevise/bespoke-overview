@@ -96,7 +96,8 @@ p {
 
 /* Use only this declaration to disable transitions in and out of overview */
 /*
-.bespoke-overview .bespoke-slide {
+.bespoke-overview-to .bespoke-slide,
+.bespoke-overview-from .bespoke-slide {
   -webkit-transition: none;
      -moz-transition: none;
        -o-transition: none;
@@ -105,17 +106,17 @@ p {
 */
 
 .bespoke-overview-to .bespoke-slide {
-  -webkit-transition: transform 0.5s ease-out, opacity 0.5s ease-in-out 0.4s;
-     -moz-transition: transform 0.5s ease-out, opacity 0.5s ease-in-out 0.4s;
-       -o-transition: transform 0.5s ease-out, opacity 0.5s ease-in-out 0.4s;
-          transition: transform 0.5s ease-out, opacity 0.5s ease-in-out 0.4s;
+  -webkit-transition: -webkit-transform 0.5s ease-out, opacity 0.5s ease-in-out 0.4s;
+     -moz-transition:    -moz-transform 0.5s ease-out, opacity 0.5s ease-in-out 0.4s;
+       -o-transition:      -o-transform 0.5s ease-out, opacity 0.5s ease-in-out 0.4s;
+          transition:         transform 0.5s ease-out, opacity 0.5s ease-in-out 0.4s;
 }
 
 .bespoke-overview-from .bespoke-slide {
-  -webkit-transition: transform 0.5s ease-in-out 0.05s, opacity 0.15s ease-in-out;
-     -moz-transition: transform 0.5s ease-in-out 0.05s, opacity 0.15s ease-in-out;
-       -o-transition: transform 0.5s ease-in-out 0.05s, opacity 0.15s ease-in-out;
-          transition: transform 0.5s ease-in-out 0.05s, opacity 0.15s ease-in-out;
+  -webkit-transition: -webkit-transform 0.5s ease-in-out 0.05s, opacity 0.15s ease-in-out;
+     -moz-transition:    -moz-transform 0.5s ease-in-out 0.05s, opacity 0.15s ease-in-out;
+       -o-transition:      -o-transform 0.5s ease-in-out 0.05s, opacity 0.15s ease-in-out;
+          transition:         transform 0.5s ease-in-out 0.05s, opacity 0.15s ease-in-out;
 }
 
 /* Enable style and transitions on title element */

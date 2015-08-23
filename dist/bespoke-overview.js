@@ -14,7 +14,7 @@ module.exports = function(opts) {
     opts = (typeof opts === 'object' ? opts : {});
     var KEYCODE = { o: 79, enter: 13, esc: 27 },
     CSV_RE = new RegExp(', *'),
-    VENDOR_PREFIX = ['Webkit', 'Moz', 'ms'],
+    VENDOR_PREFIX = ['webkit', 'Moz', 'ms'],
     cols = (typeof opts.cols !== 'undefined' ? parseInt(opts.cols) : 3),
     margin = (typeof opts.margin !== 'undefined' ? parseFloat(opts.margin) : 10),
     afterTransition = null,
@@ -22,7 +22,7 @@ module.exports = function(opts) {
     // TODO memoize results
     getStyleProperty = function(element, name) {
       if (name in element.style) return name;
-      var properName = name.charAt(0) + name.substr(1);
+      var properName = name.charAt(0).toUpperCase() + name.substr(1);
       for (var i = 0, len = VENDOR_PREFIX.length; i < len; i++) {
         var vendorName = VENDOR_PREFIX[i] + properName;
         if (vendorName in element.style) return vendorName;
