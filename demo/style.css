@@ -106,6 +106,13 @@ p {
 }
 */
 
+.bespoke-overview .bespoke-slide {
+  -webkit-transition: none;
+     -moz-transition: none;
+       -o-transition: none;
+          transition: none;
+}
+
 .bespoke-overview-to .bespoke-slide {
   -webkit-transition: -webkit-transform 0.5s ease-out 0s, opacity 0.5s ease-in-out 0.4s;
      -moz-transition:    -moz-transform 0.5s ease-out 0s, opacity 0.5s ease-in-out 0.4s;
