@@ -220,7 +220,7 @@ module.exports = function(opts) {
       if (scaleParent) {
         baseScale = getTransformScaleFactor(scaleParent);
       }
-      else if ((baseScale = getZoomFactor(sampleSlide)) === undefined) {
+      else if (!(baseScale = getZoomFactor(sampleSlide))) {
         baseScale = 1;
       }
       if (afterTransition !== undefined) {
