@@ -186,11 +186,11 @@ module.exports = function(opts) {
               this.removeEventListener('transitionend', afterTransition, false);
               afterTransition = undefined;
               parentClassList.remove('bespoke-overview-to');
-              if (activeSlideIndex >= columns) slides[activeSlideIndex].scrollIntoView(true);
-              // NOTE kick scrollbar when it fails to awaken from zombie state
               if ('webkitAppearance' in parent.style && parent.scrollHeight > parent.offsetHeight) {
+                // NOTE kick scrollbar when it fails to awaken from zombie state
                 forceReflowWithModulation(parent, 'overflowY', 'auto', 'scroll');
               }
+              if (activeSlideIndex >= columns) slides[activeSlideIndex].scrollIntoView(true);
             }
           }), false);
         }
@@ -298,13 +298,13 @@ module.exports = function(opts) {
     window.addEventListener('load', function resetInitialScroll() {
       window.removeEventListener('load', resetInitialScroll, false);
       if (deck.parent.scrollTop > 0) deck.parent.scrollTop = 0;
+      if (!!opts.autostart) setTimeout(openOverview, 0);
     }, false);
     window.addEventListener('resize', onResize, false);
     document.addEventListener('keydown', onKeydown, false);
     deck.on('activate', onActivate);
     deck.on('next', onNavigate.bind(null, 1));
     deck.on('prev', onNavigate.bind(null, -1));
-    if (!!opts.autostart) openOverview();
   };
 };
 
