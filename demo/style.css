@@ -37,18 +37,23 @@ p {
   display: none;
 }
 
-.bespoke-parent {
-  /* IMPORTANT don't put overflow on other wrapper elements */
-  overflow: hidden;
-}
-
 .bespoke-parent,
 .bespoke-scale-parent {
   position: absolute;
   top: 0;
   left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.bespoke-parent {
+  /* IMPORTANT don't put overflow on other wrapper elements */
+  overflow: hidden;
+}
+
+.bespoke-scale-parent {
+  /* set width to 100vw to fix scrollbar calculation in Firefox */
   width: 100vw;
-  height: 100vh;
 }
 
 .bespoke-parent > :not(.bespoke-slide),
