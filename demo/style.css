@@ -47,7 +47,7 @@ p {
 }
 
 .bespoke-parent {
-  /* IMPORTANT don't put overflow on other wrapper elements */
+  /* IMPORTANT only put overflow on parent, not other slide wrapper elements */
   overflow: hidden;
 }
 
