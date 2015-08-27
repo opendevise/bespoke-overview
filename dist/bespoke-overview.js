@@ -12,7 +12,7 @@ module.exports = function(opts) {
   _dereq_('insert-css')(css, { prepend: true });
   return function(deck) {
     opts = (typeof opts === 'object' ? opts : {});
-    var KEYCODE = { o: 79, enter: 13, esc: 27 },
+    var KEYCODE = { o: 79, enter: 13, esc: 27, up: 38, down: 40 },
     CSV_RE = /, */,
     TRANSFORM_RE = /^translate\((-?[\d.]+)px, *(-?[\d.]+)px\) scale\(([\d.]+)\)$/,
     VENDOR_PREFIX = ['webkit', 'Moz', 'ms'],
@@ -66,7 +66,7 @@ module.exports = function(opts) {
     },
     onNavigate = function(offset, slideEvent) {
       if (overviewActive) {
-        var targetIndex = slideEvent.index + offset;
+        var targetIndex = (slideEvent || { index: deck.slide() }).index + offset;
         // IMPORTANT must navigate using deck.slide to step over bullets
         if (targetIndex > -1 && targetIndex < deck.slides.length) deck.slide(targetIndex);
         return false;
@@ -286,12 +286,18 @@ module.exports = function(opts) {
     },
     onKeydown = function(e) {
       switch(e.which) {
-        case KEYCODE.o:
         case KEYCODE.esc:
+        case KEYCODE.o:
           if (!e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) toggleOverview();
           break;
         case KEYCODE.enter:
           if (overviewActive && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) closeOverview();
+          break;
+        case KEYCODE.up:
+          if (overviewActive) return onNavigate(-columns);
+          break;
+        case KEYCODE.down:
+          if (overviewActive) return onNavigate(columns);
           break;
       }
     };
