@@ -1,9 +1,9 @@
 var gulp = require('gulp'),
-  clean = require('gulp-clean'),
+  del = require('del'),
   jshint = require('gulp-jshint'),
   map = require('vinyl-map'),
   istanbul = require('istanbul'),
-  karma = require('gulp-karma'),
+  karma = require('karma'),
   coveralls = require('gulp-coveralls'),
   header = require('gulp-header'),
   rename = require('gulp-rename'),
@@ -12,8 +12,7 @@ var gulp = require('gulp'),
   browserify = require('browserify'),
   source = require('vinyl-source-stream'),
   buffer = require('vinyl-buffer'),
-  path = require('path'),
-  template = require('lodash').template;
+  path = require('path');
 
 gulp.task('default', ['clean', 'lint', 'test', 'compile']);
 gulp.task('dev', ['compile', 'lint', 'test', 'watch']);
@@ -23,9 +22,8 @@ gulp.task('watch', function() {
   gulp.watch('test/spec/**/*.js', ['test']);
 });
 
-gulp.task('clean', function() {
-  return gulp.src(['dist', 'lib-instrumented', 'test/coverage'], { read: false })
-    .pipe(clean());
+gulp.task('clean', function(done) {
+  del(['dist', 'lib-instrumented', 'test/coverage'], done);
 });
 
 gulp.task('lint', function() {
@@ -45,9 +43,11 @@ gulp.task('instrument', function() {
     .pipe(gulp.dest('lib-instrumented'));
 });
 
-gulp.task('test', ['instrument'], function() {
-  return gulp.src(['test/spec/*Spec.js'])
-    .pipe(karma({ configFile: 'karma.conf.js' }));
+gulp.task('test', ['instrument'], function(done) {
+  new karma.Server({
+    configFile: __dirname + '/karma.conf.js',
+    singleRun: true
+  }, done).start();
 });
 
 gulp.task('coveralls', ['test'], function() {
@@ -56,27 +56,27 @@ gulp.task('coveralls', ['test'], function() {
 });
 
 gulp.task('compile', ['clean'], function() {
-  return browserify('./lib/bespoke-overview.js')
+  return browserify({ standalone: 'bespoke.plugins.overview' })
+    .add('./lib/bespoke-overview.js')
     .transform('brfs')
-    .bundle({ standalone: 'bespoke.plugins.overview' })
+    .bundle()
     .pipe(source('bespoke-overview.js'))
     .pipe(buffer())
-    .pipe(header(template([
+    .pipe(header([
       '/*!',
       ' * <%= name %> v<%= version %>',
       ' *',
       ' * Copyright <%= new Date().getFullYear() %>, <%= author.name %>',
-      ' * This content is released under the <%= licenses[0].type %> license',
-      ' * <%= licenses[0].url %>',
+      ' * This content is released under the <%= license %> license',
       ' */\n\n'
-    ].join('\n'), pkg)))
+    ].join('\n'), pkg))
     .pipe(gulp.dest('dist'))
     .pipe(rename('bespoke-overview.min.js'))
     .pipe(uglify())
-    .pipe(header(template([
+    .pipe(header([
       '/*! <%= name %> v<%= version %> ',
       '© <%= new Date().getFullYear() %> <%= author.name %>, ',
-      '<%= licenses[0].type %> License */\n'
-    ].join(''), pkg)))
+      '<%= license %> License */\n'
+    ].join(''), pkg))
     .pipe(gulp.dest('dist'));
 });
