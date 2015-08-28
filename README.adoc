@@ -5,7 +5,7 @@ Dan Allen
 :experimental:
 :uri-raw-file-base: https://raw.githubusercontent.com/opendevise/bespoke-overview/master
 
-The bespoke-overview plugin presents an overview of all the slides when either the kbd:[o] or kbd:[esc] key is pressed in a http://markdalgleish.com/projects/bespoke.js[Bespoke.js] presentation.
+The bespoke-overview plugin presents an overview of all the slides when the kbd:[o] is pressed in a http://markdalgleish.com/projects/bespoke.js[Bespoke.js] presentation.
 This overview mode gives you a “big picture” view of the presentation.
 It can also be used as a navigation aid to advance to an arbitrary slide.
 
@@ -94,7 +94,7 @@ The placement of other plugins doesn't result in any known problems.
 
 == How it works
 
-When one of the trigger keys is pressed (i.e., kbd:[o] or kbd:[esc]), all the slides in the presentation become visible and are arranged in a grid layout.
+When the trigger key is pressed (i.e., kbd:[o]), all the slides in the presentation become visible and are arranged in a grid layout.
 The number of columns in the grid is controlled by the `columns` option passed to the plugin (e.g., `overview({ columns: 4 })`, which defaults to 3.
 The number of rows is determined by the number of slides in the presentation.
 A scrollbar will appear on the right side of the screen, which can be used to bring slides that spill outside the visible area into view.
