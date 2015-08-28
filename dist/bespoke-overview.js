@@ -92,12 +92,12 @@ module.exports = function(opts) {
         }
       },
       getOrCreateTitle = function(parent) {
-        var firstElement = parent.firstElementChild;
-        if (firstElement.classList.contains('bespoke-title')) return firstElement;
-        var deckHeader = document.createElement('header');
-        deckHeader.className = 'bespoke-title';
-        deckHeader.appendChild(document.createTextNode(parent.getAttribute('data-title') || document.title));
-        return parent.insertBefore(deckHeader, firstElement);
+        var first = parent.firstElementChild;
+        if (first.classList.contains('bespoke-title')) return { node: first, height: first.offsetHeight };
+        var title = document.createElement('header');
+        title.className = 'bespoke-title';
+        title.appendChild(document.createTextNode(parent.getAttribute('data-title') || document.title));
+        return { node: parent.insertBefore(title, first), height: title.offsetHeight };
       },
       openOverview = function() {
         var slides = deck.slides,
@@ -108,7 +108,7 @@ module.exports = function(opts) {
           sampleSlide = (activeSlideIndex > 0 ? slides[0] : slides[lastSlideIndex]),
           transformName = getStyleProperty(sampleSlide, 'transform'),
           scaleParent = parent.querySelector('.bespoke-scale-parent'),
-          headerHeight = 0,
+          title = null,
           baseScale = 1,
           baseZoom,
           numTransitions = 0,
@@ -124,7 +124,7 @@ module.exports = function(opts) {
           if (lastSlideIndex > 0) slides[lastSlideIndex].removeEventListener('transitionend', afterTransition, false);
           parentClassList.remove('bespoke-overview-from');
         }
-        if (!!opts.title) headerHeight = getOrCreateTitle(parent).offsetHeight;
+        if (!!opts.title) title = getOrCreateTitle(parent);
         if (initial) {
           // IMPORTANT we intentionally reselect active slide to deactivate behavior
           deck.slide(activeSlideIndex, { stopPropagation: true });
@@ -138,6 +138,7 @@ module.exports = function(opts) {
           parent.style.overflowY = 'scroll';
           parent.style.scrollBehavior = 'smooth';
         }
+        if (title) title.node.style.width = parent.clientWidth + 'px';
         var baseMargin = margin / baseScale,
           deckWidth = parent.clientWidth / baseScale,
           deckHeight = parent.clientHeight / baseScale,
@@ -152,7 +153,7 @@ module.exports = function(opts) {
           scaledMargin = baseMargin / scale,
           slideBoxWidth = slideWidth + scaledMargin,
           slideBoxHeight = slideHeight + scaledMargin,
-          scaledHeaderHeight = headerHeight / baseScale,
+          scaledTitleHeight = (title ? title.height / baseScale : 0),
           scrollbarShift = (baseZoom ? 0 : scrollbarWidth * scale),
           row = 0,
           col = 0;
@@ -161,7 +162,7 @@ module.exports = function(opts) {
         slideY += (slideHeight - (slideHeight * scale)) / 2;
         slides.forEach(function(slide) {
           var x = (baseMargin - slideX - scrollbarShift) + (col * slideBoxWidth * scale),
-            y = (baseMargin - slideY) + (row * slideBoxHeight * scale) + scaledHeaderHeight;
+            y = (baseMargin - slideY) + (row * slideBoxHeight * scale) + scaledTitleHeight;
           // NOTE drop exponential notation in near-zero numbers (since it breaks older WebKit engines)
           if (x.toString().indexOf('e-') !== -1) x = 0;
           if (y.toString().indexOf('e-') !== -1) y = 0;
