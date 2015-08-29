@@ -67,19 +67,12 @@ module.exports = function(opts) {
         if (overviewActive) {
           var targetIndex = (slideEvent || { index: deck.slide() }).index + offset;
           // IMPORTANT must navigate using deck.slide to step over bullets
-          if (targetIndex > -1 && targetIndex < deck.slides.length) deck.slide(targetIndex);
+          if (targetIndex > -1 && targetIndex < deck.slides.length) deck.slide(targetIndex, { preview: true });
           return false;
         }
       },
-      // NOTE false return value only prevents event from propagating to *subsequent* plugins
       onActivate = function(slideEvent) {
-        if ('stopPropagation' in slideEvent) {
-          return !slideEvent.stopPropagation;
-        }
-        else if (overviewActive) {
-          scrollSlideIntoView(slideEvent);
-          return false;
-        }
+        if (overviewActive) scrollSlideIntoView(slideEvent);
       },
       scrollSlideIntoView = function(slideEvent) {
         if (slideEvent === undefined) slideEvent = { index: deck.slide(), slide: deck.slides[deck.slide()] };
@@ -127,8 +120,7 @@ module.exports = function(opts) {
         }
         if (!!opts.title) title = getOrCreateTitle(parent);
         if (initial) {
-          // IMPORTANT we intentionally reselect active slide to deactivate behavior
-          deck.slide(activeSlideIndex, { stopPropagation: true });
+          deck.slide(activeSlideIndex, { preview: true });
           parentClassList.add('bespoke-overview');
           overviewActive = true;
           if (!!opts.numbers) parentClassList.add('bespoke-overview-counter');
@@ -209,7 +201,7 @@ module.exports = function(opts) {
       // NOTE the order of operation in this method is critical; heavily impacts behavior & transition smoothness
       closeOverview = function(selection) {
         // IMPORTANT we intentionally reselect active slide to activate behavior
-        deck.slide(typeof selection === 'number' ? selection : deck.slide(), { stopPropagation: false });
+        deck.slide(typeof selection === 'number' ? selection : deck.slide());
         var slides = deck.slides,
           parent = deck.parent,
           parentClassList = parent.classList,
