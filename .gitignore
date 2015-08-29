@@ -1,4 +1,5 @@
-node_modules
-bower_components
-lib-instrumented
-test/coverage
+/bower_components/
+/demo/dist/
+/lib-instrumented/
+/node_modules/
+/test/coverage/
