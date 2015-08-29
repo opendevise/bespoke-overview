@@ -1,0 +1,171 @@
+*, ::before, ::after {
+  -moz-box-sizing: inherit;
+       box-sizing: inherit;
+}
+
+html {
+  -moz-box-sizing: border-box;
+       box-sizing: border-box;
+}
+
+body {
+  font-family: 'Noto Sans', Arial, sans-serif;
+  margin: 0;
+}
+
+h1 {
+  margin: 0;
+}
+
+p {
+  margin: 0.5em 0;
+}
+
+.deck {
+  font-size: 2em;
+  line-height: 1.6;
+  color: #303030;
+  /* enable kerning using forward-compatible CSS */
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1;
+  font-kerning: normal;
+}
+
+/* Hide deck and slide content until bespoke.js has added classes */
+.deck:not(.bespoke-parent),
+.deck section:not(.bespoke-slide) {
+  display: none;
+}
+
+.bespoke-parent,
+.bespoke-scale-parent {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.bespoke-parent {
+  /* IMPORTANT only put overflow on parent, not other slide wrapper elements */
+  overflow: hidden;
+}
+
+.bespoke-scale-parent {
+  /* set width to 100vw to fix scrollbar calculation in Firefox */
+  width: 100vw;
+}
+
+.bespoke-parent > :not(.bespoke-slide),
+.bespoke-slide {
+  pointer-events: none;
+}
+
+.bespoke-slide {
+  /* force opacity to start at 0 to avoid transition on load when using bespoke-scale */
+  opacity: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 640px;
+  margin-left: -320px;
+  height: 360px;
+  margin-top: -180px;
+  display: -webkit-flex;
+          display: flex;
+  -webkit-align-items: center;
+          align-items: center;
+  -webkit-justify-content: center;
+          justify-content: center;
+  -webkit-flex-direction: column;
+          flex-direction: column;
+  /* QUESTION should we apply padding to inner content container instead? */
+  padding: 1em;
+  -webkit-transition: opacity 0.3s ease;
+     -moz-transition: opacity 0.3s ease;
+       -o-transition: opacity 0.3s ease;
+          transition: opacity 0.3s ease;
+}
+
+.bespoke-inactive {
+  /* setting opacity here is redundant */
+  /*
+  opacity: 0;
+  */
+}
+
+.bespoke-active {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+/* The following declaration disables transitions when navigating in overview and when moving to and from overview */
+/*
+.bespoke-overview .bespoke-slide,
+.bespoke-overview-to .bespoke-slide,
+.bespoke-overview-from .bespoke-slide {
+  -webkit-transition: none;
+     -moz-transition: none;
+       -o-transition: none;
+          transition: none;
+}
+*/
+
+.bespoke-overview .bespoke-slide {
+  -webkit-transition: none;
+     -moz-transition: none;
+       -o-transition: none;
+          transition: none;
+}
+
+.bespoke-overview-to .bespoke-slide {
+  -webkit-transition: -webkit-transform 0.5s ease-out 0s, opacity 0.5s ease-in-out 0.4s;
+     -moz-transition:    -moz-transform 0.5s ease-out 0s, opacity 0.5s ease-in-out 0.4s;
+       -o-transition:      -o-transform 0.5s ease-out 0s, opacity 0.5s ease-in-out 0.4s;
+          transition:         transform 0.5s ease-out 0s, opacity 0.5s ease-in-out 0.4s;
+}
+
+.bespoke-overview-from .bespoke-slide {
+  -webkit-transition: -webkit-transform 0.5s ease-in-out 0.05s, opacity 0.15s ease-in-out 0s;
+     -moz-transition:    -moz-transform 0.5s ease-in-out 0.05s, opacity 0.15s ease-in-out 0s;
+       -o-transition:      -o-transform 0.5s ease-in-out 0.05s, opacity 0.15s ease-in-out 0s;
+          transition:         transform 0.5s ease-in-out 0.05s, opacity 0.15s ease-in-out 0s;
+}
+
+/* Style the title element */
+.bespoke-title {
+  background-color: #efefef;
+  border-bottom: 1px solid #fefefe;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.2);
+}
+
+.bespoke-title h1 {
+  font-size: 1em;
+  line-height: 2em;
+  color: #606060;
+}
+
+/* Enable transitions on the title element */
+.bespoke-title {
+  opacity: 0;
+}
+
+.bespoke-overview .bespoke-title {
+  opacity: 1;
+}
+
+.bespoke-overview-to .bespoke-title {
+  visibility: visible;
+  -webkit-transition: opacity 0.5s ease-in-out 0.4s;
+     -moz-transition: opacity 0.5s ease-in-out 0.4s;
+       -o-transition: opacity 0.5s ease-in-out 0.4s;
+          transition: opacity 0.5s ease-in-out 0.4s;
+}
+
+.bespoke-overview-from .bespoke-title {
+  visibility: visible;
+  -webkit-transition: opacity 0.15s ease-in-out;
+     -moz-transition: opacity 0.15s ease-in-out;
+       -o-transition: opacity 0.15s ease-in-out;
+          transition: opacity 0.15s ease-in-out;
+}
