@@ -5,7 +5,9 @@
 .bespoke-overview .bespoke-bullet{opacity:1}
 .bespoke-overview-counter{counter-reset:overview}
 .bespoke-overview-counter .bespoke-slide::after{counter-increment:overview;content:counter(overview);position:absolute;right:0.75em;bottom:0.5em;font-size:1.25rem;line-height:1.25}
-.bespoke-title{visibility:hidden;position:absolute;top:0;left:0;width:100vw;padding:10px 0 0 0;line-height:1.2;font-weight:bold;text-align:center}
+.bespoke-title{visibility:hidden;position:absolute;top:0;left:0}
+.bespoke-title h1{margin:0;font-size:1.125em;line-height:1.6;text-align:center}
 .bespoke-overview:not(.bespoke-overview-to) .bespoke-title{visibility:visible;pointer-events:auto}
+.bespoke-overview:not(.bespoke-overview-to) .bespoke-title *{pointer-events:auto}
 /* z-index only works when slides are siblings */
 .bespoke-overview-to .bespoke-active,.bespoke-overview-from .bespoke-active{z-index:1}

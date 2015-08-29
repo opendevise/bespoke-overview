@@ -132,14 +132,22 @@ p {
           transition:         transform 0.5s ease-in-out 0.05s, opacity 0.15s ease-in-out 0s;
 }
 
-/* Enable style and transitions on title element */
+/* Style the title element */
+.bespoke-title {
+  background-color: #efefef;
+  border-bottom: 1px solid #fefefe;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.2);
+}
+
+.bespoke-title h1 {
+  font-size: 1em;
+  line-height: 2em;
+  color: #606060;
+}
+
+/* Enable transitions on the title element */
 .bespoke-title {
   opacity: 0;
-  background-color: #efefef;
-  color: #606060;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #fefefe;
-  box-shadow: 0 1px 8px rgba(0,0,0,0.2);
 }
 
 .bespoke-overview .bespoke-title {
