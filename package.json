@@ -17,7 +17,6 @@
     "url": "git://github.com/opendevise/bespoke-overview.git"
   },
   "scripts": {
-    "coveralls": "gulp coveralls",
     "test": "gulp"
   },
   "peerDependencies": {
@@ -34,7 +33,6 @@
     "del": "^1.2.0",
     "function-bind": "^1.0.2",
     "gulp": "^3.9.0",
-    "gulp-coveralls": "^0.1.4",
     "gulp-header": "^1.2.2",
     "gulp-jshint": "^1.11.2",
     "gulp-rename": "^1.2.2",

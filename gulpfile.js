@@ -4,7 +4,6 @@ var gulp = require('gulp'),
   map = require('vinyl-map'),
   istanbul = require('istanbul'),
   karma = require('karma'),
-  coveralls = require('gulp-coveralls'),
   header = require('gulp-header'),
   rename = require('gulp-rename'),
   uglify = require('gulp-uglify'),
@@ -48,11 +47,6 @@ gulp.task('test', ['instrument'], function(done) {
     configFile: __dirname + '/karma.conf.js',
     singleRun: true
   }, done).start();
-});
-
-gulp.task('coveralls', ['test'], function() {
-  return gulp.src(['test/coverage/**/lcov.info'])
-    .pipe(coveralls());
 });
 
 gulp.task('compile', ['clean'], function() {
