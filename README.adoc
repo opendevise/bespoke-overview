@@ -140,6 +140,9 @@ The selected slide will be scrolled into view automatically, if necessary.
 
 NOTE: For browsers that honor the CSS https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-behavior[scroll-behavior] property (e.g., Firefox), the slides will be scrolled into view smoothly.
 
+WARNING: In overview mode, you won't be able to scroll up and down on a mobile device using touch events due to how the bespoke-touch plugin works (it intercepts the default behavior by calling `preventDefault()`).
+However, you can still navigate from slide to slide using a horizontal (left and right) swipe gesture.
+
 There are two ways to leave overview mode.
 When one of the trigger keys is pressed (i.e., kbd:[o] or kbd:[enter]), the presentation will exit from overview mode and show the selected slide in the normal (single slide) mode.
 If, instead, one of the slides is clicked, the presentation will return to the normal (single slide) mode after advancing to the slide that received the click.
