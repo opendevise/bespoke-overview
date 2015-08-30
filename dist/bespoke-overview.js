@@ -16,7 +16,7 @@ module.exports = function(opts) {
       TRANSFORM_RE = /^translate\((-?[\d.]+)px, *(-?[\d.]+)px\) scale\(([\d.]+)\)$/,
       VENDOR_PREFIX = ['webkit', 'Moz', 'ms'],
       columns = (typeof opts.columns === 'number' ? parseInt(opts.columns) : 3),
-      margin = (typeof opts.margin === 'number' ? parseFloat(opts.margin) : 10),
+      margin = (typeof opts.margin === 'number' ? parseFloat(opts.margin) : 15),
       overviewActive = false,
       afterTransition,
       getStyleProperty = function(element, name) {
@@ -42,7 +42,7 @@ module.exports = function(opts) {
           style = getComputedStyle(element),
           transitionProperty = style[getStyleProperty(element, 'transitionProperty')];
         if (!transitionProperty || transitionProperty === 'none') return result;
-        // NOTE beyond this point, assume style returns compliant values
+        // NOTE beyond this point, assume computed style returns compliant values
         transitionProperty = transitionProperty.split(CSV_RE);
         var transitionDuration = style[getStyleProperty(element, 'transitionDuration')].split(CSV_RE),
           transitionDelay = style[getStyleProperty(element, 'transitionDelay')].split(CSV_RE);
@@ -132,37 +132,34 @@ module.exports = function(opts) {
           parent.style.scrollBehavior = 'smooth';
         }
         if (title) title.node.style.width = parent.clientWidth + 'px';
-        var baseMargin = margin / baseScale,
-          deckWidth = parent.clientWidth / baseScale,
+        var deckWidth = parent.clientWidth / baseScale,
           deckHeight = parent.clientHeight / baseScale,
           scrollbarWidth = parent.offsetWidth - parent.clientWidth,
-          // FIXME this calculation doesn't take into account margins on parent
-          totalGutter = baseMargin * (columns + 1),
           slideWidth = sampleSlide.offsetWidth,
           slideHeight = sampleSlide.offsetHeight,
           slideX = (deckWidth - slideWidth) / 2,
           slideY = (deckHeight - slideHeight) / 2,
-          scale = (deckWidth - totalGutter) / columns / slideWidth,
-          scaledMargin = baseMargin / scale,
-          slideBoxWidth = slideWidth + scaledMargin,
-          slideBoxHeight = slideHeight + scaledMargin,
+          scale = deckWidth / (columns * slideWidth + (columns + 1) * margin),
+          scaledSlideWidth = slideWidth * scale,
+          scaledSlideHeight = slideHeight * scale,
+          scaledMargin = margin * scale,
           scaledTitleHeight = (title ? title.height / baseScale : 0),
           scrollbarShift = (baseZoom ? 0 : scrollbarWidth * scale),
           row = 0,
           col = 0;
         // NOTE recalculate x & y offset based on transform origin at center of slide
-        slideX += (slideWidth - (slideWidth * scale)) / 2;
-        slideY += (slideHeight - (slideHeight * scale)) / 2;
+        slideX += (slideWidth - scaledSlideWidth) / 2;
+        slideY += (slideHeight - scaledSlideHeight) / 2;
         slides.forEach(function(slide) {
-          var x = (baseMargin - slideX - scrollbarShift) + (col * slideBoxWidth * scale),
-            y = (baseMargin - slideY) + (row * slideBoxHeight * scale) + scaledTitleHeight;
+          var x = col * scaledSlideWidth + (col + 1) * scaledMargin - scrollbarShift - slideX,
+            y = row * scaledSlideHeight + (row + 1) * scaledMargin + scaledTitleHeight - slideY;
           // NOTE drop exponential notation in near-zero numbers (since it breaks older WebKit engines)
           if (x.toString().indexOf('e-') !== -1) x = 0;
           if (y.toString().indexOf('e-') !== -1) y = 0;
           slide.style[transformName] = 'translate(' + x + 'px, ' + y + 'px) scale(' + scale + ')';
           // NOTE add margin to last slide to leave gap below last row; doesn't work in Firefox
-          // HACK setting marginBottom forces Webkit to reflow content; also forces scrollbar to recalculate
-          slide.style.marginBottom = ((row * columns + col) === lastSlideIndex ? scaledMargin + 'px' : '0%');
+          // HACK setting marginBottom forces Webkit to reflow content and forces scrollbar to recalculate
+          slide.style.marginBottom = ((row * columns + col) === lastSlideIndex ? margin + 'px' : '0%');
           slide.addEventListener('click', onSlideClick, false);
           if (col === (columns - 1)) {
             row += 1;

@@ -63,8 +63,9 @@ The following options are available to the bespoke-plugin:
 columns _(type: integer, default: 3)_::
 The number of columns to use for the grid. (type: number)
 
-margin _(type: number, default: 10)_::
+margin _(type: number, default: 15)_::
 The spacing (in pixels) between the slides in the grid.
+This value is scaled by the same amount as the slides when in overview mode.
 
 autostart _(type: boolean, default: false)_::
 A flag that controls whether the presentation starts in overview mode.
