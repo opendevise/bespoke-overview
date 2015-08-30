@@ -69,7 +69,7 @@ The number of columns to use for the grid.
 
 margin _(type: number, default: 15)_::
 The spacing (in pixels) between the slides in the grid.
-This value is scaled by the same amount as the slides when in overview mode.
+This value is scaled alone with the slides in overview mode.
 
 autostart _(type: boolean, default: false)_::
 A flag that controls whether the presentation starts in overview mode.
@@ -81,9 +81,11 @@ The style of the numbers can be controlled using the `.bespoke-overview-counter 
 
 title _(type: boolean, default: false)_::
 A flag that controls whether the presentation title is shown above the slides in overview mode.
-When enabled, adds a `<header>` element with the `bespoke-title` class as the first child of the deck parent element.
-The title content is taken from either the `data-title` attribute on the deck parent or `document.title`.
+When enabled, adds a `<header class="bespoke-title">` element as the first child of the deck parent element containing the title wrapped in a child `<h1>` element.
+The title text is taken from either the `data-title` attribute on the deck parent or `document.title`.
 The style of the title can be controlled using the `.bespoke-overview .bespoke-title` CSS selector.
+
+==== Options example
 
 Here's an example showing all the options enabled:
 
