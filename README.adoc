@@ -9,14 +9,18 @@ The bespoke-overview plugin presents an overview of all the slides when the kbd:
 This overview mode gives you a “big picture” view of the presentation.
 It can also be used as a navigation aid to advance to an arbitrary slide.
 
+image::demo/screenshot.png[Screenshot of bespoke-overview]
+
 == Download
 
 Download the {uri-raw-file-base}/dist/bespoke-overview.min.js[production mode version] or the {uri-raw-file-base}/dist/bespoke-overview.js[development mode version], or use a <<package-managers,package manager>>.
 
 == Example
 
+http://opendevise.github.io/bespoke-overview[View the demo] online.
+
 This repository includes a demo folder the shows this plugin in action.
-To view it, you first need to clone this repository:
+To view it locally, you first need to clone this repository:
 
  $ git clone https://github.com/opendevise/bespoke-overview && cd bespoke-overview
 
@@ -81,6 +85,16 @@ When enabled, adds a `<header>` element with the `bespoke-title` class as the fi
 The title content is taken from either the `data-title` attribute on the deck parent or `document.title`.
 The style of the title can be controlled using the `.bespoke-overview .bespoke-title` CSS selector.
 
+Here's an example showing all the options enabled:
+
+```
+bespoke.from('.deck', [
+  classes(),
+  keys(),
+  overview({ columns: 2, margin: 10, autostart: true, numbers: true, title: true })
+]);
+```
+
 === Plugin order
 
 The overview plugin should be applied in the following order relative to other plugins:
@@ -122,11 +136,14 @@ You can use the cursor to navigate through the slides in overview mode.
 You'll see the selection border advance as you use the left and right arrows (kbd:[<-] and kbd:[->], respectively).
 The selected slide will be scrolled into view automatically, if necessary.
 
+NOTE: For browsers that honor the CSS https://developer.mozilla.org/en-US/docs/Web/CSS/scroll-behavior[scroll-behavior] property (e.g., Firefox), the slides will be scrolled into view smoothly.
+
 There are two ways to leave overview mode.
 When one of the trigger keys is pressed (i.e., kbd:[o] or kbd:[enter]), the presentation will exit from overview mode and show the selected slide in the normal (single slide) mode.
 If, instead, one of the slides is clicked, the presentation will return to the normal (single slide) mode after advancing to the slide that received the click.
 
-When overview mode is deactivated, the `bespoke-overview` class is removed from the deck parent, the manual transform on each slide is removed, the scroll is reset and the scrollbar is hidden.
+When overview mode is deactivated, the `bespoke-overview` class is removed from the deck parent, the scrollbar is hidden, the slides are temporarily repositioned to account for the deactivation of the scrollbar and, finally, the manual transform on each slide is removed.
+(If there's a scroll offset when the overview mode is deactivated, it will appear as though the selected slide transitions from its position in the overview to its position in slide mode thanks to an interim translation of its position).
 
 == Transitions
 
@@ -134,7 +151,18 @@ The bespoke-overview plugin gives you fine-grained control over the transition g
 The `bespoke-overview-to` class is added to the deck parent when the overview is activated and remains there until all slide transitions, if any, are complete.
 Conversely, the `bespoke-overview-from` class is added to the deck parent when the overview is deactivated and remains there until all slide transitions, if any, are complete.
 
-IMPORTANT: The `bespoke-overview` class is removed immediately when the overview mode is deactivated, whereas the `bespoke-overview-from` class remains on the deck parent element until all slide transitions, if any, are complete.
+IMPORTANT: The transform origin is assumed to be 50% 50% (i.e., the center of the slide).
+
+NOTE: The `bespoke-overview` class is removed immediately when the overview mode is deactivated, whereas the `bespoke-overview-from` class remains on the deck parent element until all slide transitions, if any, are complete.
+
+TIP: If you want to defer a style change until the transition into overview mode is complete, using the CSS selector `.bespoke-overview:not(.bespoke-overview-to)`.
+
+.Understanding z-index values
+****
+If each slide is enclosed in a wrapper element that has a transform applied to it (e.g., when bespoke-scale is enabled and configured to use the transform strategy), the z-index setting on a slide will have no effect on the visual stacking order.
+This happens because a wrapper element with a transform applied creates a new stacking context, which limits the scope of the z-index setting (i.e., the value only applies relative to other elements in the stacking context).
+Under these conditions, the active slide may not appear on top when transitioning out of overview mode regardless of the z-index setting.
+****
 
 === Default transitions
 
@@ -195,7 +223,7 @@ If you enable the title, you can also use the `bespoke-overview-to` and `bespoke
 }
 ```
 
-IMPORTANT: The visibility property is important as it overrides the built-in behavior necessary to work when transitions on the title are not used.
+IMPORTANT: The `visibility` property is important as it overrides the built-in behavior necessary to work when transitions on the title are not used.
 
 == Package managers
 
