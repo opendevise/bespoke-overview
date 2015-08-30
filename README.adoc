@@ -65,7 +65,7 @@ bespoke.from('.deck', [
 The following options are available to the bespoke-plugin:
 
 columns _(type: integer, default: 3)_::
-The number of columns to use for the grid. (type: number)
+The number of columns to use for the grid.
 
 margin _(type: number, default: 15)_::
 The spacing (in pixels) between the slides in the grid.
