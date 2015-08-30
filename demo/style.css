@@ -140,9 +140,11 @@ p {
 }
 
 .bespoke-title h1 {
-  font-size: 1em;
-  line-height: 2em;
+  font-size: 1.4em;
+  line-height: 1.2;
   color: #606060;
+  text-align: center;
+  padding: 15px;
 }
 
 /* Enable transitions on the title element */

@@ -85,9 +85,12 @@ When enabled, adds a `<header class="bespoke-title">` element as the first child
 The title text is taken from either the `data-title` attribute on the deck parent or `document.title`.
 The style of the title can be controlled using the `.bespoke-overview .bespoke-title` CSS selector.
 
+scaleTitle _(type: boolean, default: true)_::
+A flag that controls whether the title element is scaled proportionally to the scaling of the slides.
+
 ==== Options example
 
-Here's an example showing all the options enabled:
+Here's an example showing many of the options in use:
 
 ```
 bespoke.from('.deck', [

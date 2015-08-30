@@ -7,7 +7,7 @@
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g=(g.bespoke||(g.bespoke = {}));g=(g.plugins||(g.plugins = {}));g.overview = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 module.exports = function(opts) {
-  var css = ".bespoke-overview.bespoke-parent{pointer-events:auto}\n.bespoke-overview :not(img){pointer-events:none}\n.bespoke-overview .bespoke-slide{opacity:1;visibility:visible;cursor:pointer;pointer-events:auto}\n.bespoke-overview .bespoke-active{outline:0.4vw solid #cfd8dc;outline-offset:-0.2vw;-moz-outline-radius:0.2vw}\n.bespoke-overview .bespoke-bullet{opacity:1}\n.bespoke-overview-counter{counter-reset:overview}\n.bespoke-overview-counter .bespoke-slide::after{counter-increment:overview;content:counter(overview);position:absolute;right:0.75em;bottom:0.5em;font-size:1.25rem;line-height:1.25}\n.bespoke-title{visibility:hidden;position:absolute;top:0;left:0;width:100vw}\n.bespoke-title h1{margin:0;font-size:1.125em;line-height:1.6;text-align:center}\n.bespoke-overview:not(.bespoke-overview-to) .bespoke-title{visibility:visible;pointer-events:auto}\n.bespoke-overview:not(.bespoke-overview-to) .bespoke-title *{pointer-events:auto}\n/* z-index only works when slides are siblings */\n.bespoke-overview-to .bespoke-active,.bespoke-overview-from .bespoke-active{z-index:1}";
+  var css = ".bespoke-overview.bespoke-parent{pointer-events:auto}\n.bespoke-overview :not(img){pointer-events:none}\n.bespoke-overview .bespoke-slide{opacity:1;visibility:visible;cursor:pointer;pointer-events:auto}\n.bespoke-overview .bespoke-active{outline:0.4vw solid #cfd8dc;outline-offset:-0.2vw;-moz-outline-radius:0.2vw}\n.bespoke-overview .bespoke-bullet{opacity:1}\n.bespoke-overview-counter{counter-reset:overview}\n.bespoke-overview-counter .bespoke-slide::after{counter-increment:overview;content:counter(overview);position:absolute;right:0.75em;bottom:0.5em;font-size:1.25rem;line-height:1.25}\n.bespoke-title{visibility:hidden;position:absolute;top:0;left:0;width:100%}\n.bespoke-title h1{margin:0;font-size:1.6em;line-height:1.2;text-align:center}\n.bespoke-overview:not(.bespoke-overview-to) .bespoke-title{visibility:visible;pointer-events:auto}\n.bespoke-overview:not(.bespoke-overview-to) .bespoke-title *{pointer-events:auto}\n/* z-index only works when slides are siblings */\n.bespoke-overview-to .bespoke-active,.bespoke-overview-from .bespoke-active{z-index:1}";
   require('insert-css')(css, { prepend: true });
   return function(deck) {
     opts = (typeof opts === 'object' ? opts : {});
@@ -34,7 +34,7 @@ module.exports = function(opts) {
       getZoomFactor = function(element) {
         if ('zoom' in element.style) {
           var zoom = element.style.zoom;
-          if (zoom.length > 0) return parseFloat(zoom);
+          return zoom.length > 0 ? parseFloat(zoom) : 1;
         }
       },
       getTransitionProperties = function(element) {
@@ -72,7 +72,7 @@ module.exports = function(opts) {
         }
       },
       onActivate = function(slideEvent) {
-        if (overviewActive) scrollSlideIntoView(slideEvent);
+        if (overviewActive && slideEvent.scrollIntoView !== false) scrollSlideIntoView(slideEvent);
       },
       scrollSlideIntoView = function(slideEvent) {
         if (slideEvent === undefined) slideEvent = { index: deck.slide(), slide: deck.slides[deck.slide()] };
@@ -87,14 +87,16 @@ module.exports = function(opts) {
         var first = parent.firstElementChild;
         if (first.classList.contains('bespoke-title')) {
           first.style.width = '';
-          return { node: first, height: first.offsetHeight };
+          return first;
         }
         var header = document.createElement('header');
         header.className = 'bespoke-title';
+        header.style[getStyleProperty(header, 'transformOrigin')] = '0 0';
         var h1 = document.createElement('h1');
         h1.appendChild(document.createTextNode(parent.getAttribute('data-title') || document.title));
         header.appendChild(h1);
-        return { node: parent.insertBefore(header, first), height: header.offsetHeight };
+        parent.insertBefore(header, first).offsetHeight; // jshint ignore:line
+        return header;
       },
       openOverview = function() {
         var slides = deck.slides,
@@ -134,27 +136,35 @@ module.exports = function(opts) {
           parent.style.overflowY = 'scroll';
           parent.style.scrollBehavior = 'smooth';
         }
-        var scrollbarWidth = parent.offsetWidth - parent.clientWidth;
-        if (title && scrollbarWidth > 0) title.node.style.width = parent.clientWidth + 'px';
         var deckWidth = parent.clientWidth / baseScale,
           deckHeight = parent.clientHeight / baseScale,
+          scrollbarWidth = parent.offsetWidth - parent.clientWidth,
           slideWidth = sampleSlide.offsetWidth,
           slideHeight = sampleSlide.offsetHeight,
-          slideX = (deckWidth - slideWidth) / 2,
-          slideY = (deckHeight - slideHeight) / 2,
           scale = deckWidth / (columns * slideWidth + (columns + 1) * margin),
+          totalScale = baseScale * scale,
           scaledSlideWidth = slideWidth * scale,
           scaledSlideHeight = slideHeight * scale,
+          // NOTE x & y offset calculation based on transform origin at center of slide
+          slideX = (deckWidth - scaledSlideWidth) / 2,
+          slideY = (deckHeight - scaledSlideHeight) / 2,
           scaledMargin = margin * scale,
-          scaledTitleHeight = (title ? title.height / baseScale : 0),
-          scrollbarShift = (baseZoom ? 0 : scrollbarWidth * scale),
-          row = 0,
-          col = 0;
-        // NOTE recalculate x & y offset based on transform origin at center of slide
-        slideX += (slideWidth - scaledSlideWidth) / 2;
-        slideY += (slideHeight - scaledSlideHeight) / 2;
+          scaledTitleHeight = 0,
+          scrollbarOffset = (baseZoom ? 0 : scrollbarWidth * scale),
+          row = 0, col = 0;
+        if (title) {
+          if (opts.scaleTitle !== false) {
+            title.style[baseZoom ? 'zoom' : transformName] = (baseZoom ? totalScale : 'scale(' + totalScale + ')');
+            title.style.width = (parent.clientWidth / totalScale) + 'px';
+            scaledTitleHeight = title.offsetHeight * scale;
+          }
+          else {
+            if (scrollbarWidth > 0) title.style.width = parent.clientWidth + 'px';
+            scaledTitleHeight = title.offsetHeight / baseScale;
+          }
+        }
         slides.forEach(function(slide) {
-          var x = col * scaledSlideWidth + (col + 1) * scaledMargin - scrollbarShift - slideX,
+          var x = col * scaledSlideWidth + (col + 1) * scaledMargin - scrollbarOffset - slideX,
             y = row * scaledSlideHeight + (row + 1) * scaledMargin + scaledTitleHeight - slideY;
           // NOTE drop exponential notation in near-zero numbers (since it breaks older WebKit engines)
           if (x.toString().indexOf('e-') !== -1) x = 0;
@@ -201,7 +211,7 @@ module.exports = function(opts) {
       // NOTE the order of operation in this method is critical; heavily impacts behavior & transition smoothness
       closeOverview = function(selection) {
         // IMPORTANT we intentionally reselect active slide to activate behavior
-        deck.slide(typeof selection === 'number' ? selection : deck.slide());
+        deck.slide(typeof selection === 'number' ? selection : deck.slide(), { scrollIntoView: false });
         var slides = deck.slides,
           parent = deck.parent,
           parentClassList = parent.classList,
@@ -279,19 +289,19 @@ module.exports = function(opts) {
         if (overviewActive) openOverview();
       },
       onKeydown = function(e) {
-        switch(e.which) {
-          case KEYCODE.o:
-            if (!e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) toggleOverview();
-            break;
-          case KEYCODE.enter:
-            if (overviewActive && !e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) closeOverview();
-            break;
-          case KEYCODE.up:
-            if (overviewActive) return onNavigate(-columns);
-            break;
-          case KEYCODE.down:
-            if (overviewActive) return onNavigate(columns);
-            break;
+        if (e.which === KEYCODE.o) {
+          if (!e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) toggleOverview();
+        }
+        else if (overviewActive) {
+          switch (e.which) {
+            case KEYCODE.enter:
+              if (!e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) closeOverview();
+              break;
+            case KEYCODE.up:
+              return onNavigate(-columns);
+            case KEYCODE.down:
+              return onNavigate(columns);
+          }
         }
       };
     window.addEventListener('load', function resetInitialScroll() {
