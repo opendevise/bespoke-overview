@@ -1,7 +1,7 @@
 Function.prototype.bind = Function.prototype.bind || require('function-bind');
 
 var bespoke = require('bespoke'),
-  overview = require('../../lib-instrumented/bespoke-overview.js');
+  overview = require('../../lib/bespoke-overview.js');
 
 describe("bespoke-overview", function() {
 

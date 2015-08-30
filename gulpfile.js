@@ -2,7 +2,6 @@ var gulp = require('gulp'),
   del = require('del'),
   jshint = require('gulp-jshint'),
   map = require('vinyl-map'),
-  istanbul = require('istanbul'),
   karma = require('karma'),
   concat = require('gulp-concat'),
   header = require('gulp-header'),
@@ -25,7 +24,7 @@ gulp.task('watch', function() {
 });
 
 gulp.task('clean', function(done) {
-  del(['dist', 'demo/dist', 'lib-instrumented', 'test/coverage'], done);
+  del(['dist', 'demo/dist', 'test/coverage'], done);
 });
 
 gulp.task('lint', function() {
@@ -34,21 +33,9 @@ gulp.task('lint', function() {
     .pipe(jshint.reporter('jshint-stylish'));
 });
 
-//gulp.task('instrument', ['clean'], function() {
-gulp.task('instrument', function() {
-  return gulp.src('lib/**/*.js')
-    .pipe(map(function(code, filename) {
-      var instrumenter = new istanbul.Instrumenter(),
-        relativePath = path.relative(__dirname, filename);
-      return instrumenter.instrumentSync(code.toString(), relativePath);
-    }))
-    .pipe(gulp.dest('lib-instrumented'));
-});
-
-gulp.task('test', ['instrument'], function(done) {
+gulp.task('test', function(done) {
   new karma.Server({
-    configFile: __dirname + '/karma.conf.js',
-    singleRun: true
+    configFile: __dirname + '/karma.conf.js'
   }, done).start();
 });
 

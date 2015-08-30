@@ -14,6 +14,10 @@ module.exports = function(config) {
       'test/**/*.js': 'browserify'
     },
 
+    browserify: {
+      transform: ['browserify-istanbul'],
+    },
+
     reporters: ['progress', 'coverage'],
 
     coverageReporter: {
