@@ -6,8 +6,8 @@ Dan Allen
 :uri-raw-file-base: https://raw.githubusercontent.com/opendevise/bespoke-overview/master
 
 The bespoke-overview plugin presents an overview of all the slides when the kbd:[o] is pressed in a http://markdalgleish.com/projects/bespoke.js[Bespoke.js] presentation.
-This overview mode gives you a “big picture” view of the presentation.
-It can also be used as a navigation aid to advance to an arbitrary slide.
+The overview mode gives you a “big picture” view of the presentation.
+It can also be used as a navigation aid to jump to an arbitrary slide.
 
 image::demo/screenshot.png[Screenshot of bespoke-overview]
 
