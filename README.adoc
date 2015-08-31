@@ -1,9 +1,17 @@
 = bespoke-overview
 Dan Allen
+// Settings:
 :idprefix:
 :idseparator: -
 :experimental:
+ifdef::env-github[:badges:]
+// URIs:
 :uri-raw-file-base: https://raw.githubusercontent.com/opendevise/bespoke-overview/master
+
+ifdef::badges[]
+//image:https://img.shields.io/npm/v/bespoke-overview.svg[npm package, link=https://www.npmjs.com/package/bespoke-overview]
+image:https://img.shields.io/travis/opendevise/bespoke-overview/master.svg[Build Status (Travis CI), link=https://travis-ci.org/opendevise/bespoke-overview]
+endif::[]
 
 The bespoke-overview plugin presents an overview of all the slides when the kbd:[o] is pressed in a http://markdalgleish.com/projects/bespoke.js[Bespoke.js] presentation.
 The overview mode gives you a “big picture” view of the presentation.
