@@ -34,7 +34,8 @@ gulp.task('lint', function() {
 
 gulp.task('test', function(done) {
   new karma.Server({
-    configFile: __dirname + '/karma.conf.js'
+    configFile: __dirname + '/karma.conf.js',
+    singleRun: true
   }, done).start();
 });
 
