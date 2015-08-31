@@ -1,7 +1,6 @@
 var gulp = require('gulp'),
   del = require('del'),
   jshint = require('gulp-jshint'),
-  map = require('vinyl-map'),
   karma = require('karma'),
   concat = require('gulp-concat'),
   header = require('gulp-header'),
