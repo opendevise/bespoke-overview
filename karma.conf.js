@@ -21,8 +21,11 @@ module.exports = function(config) {
     reporters: ['progress', 'coverage'],
 
     coverageReporter: {
-      type : 'lcov',
-      dir : 'test/coverage'
+      dir: 'test/coverage',
+      reporters: [
+        { type: 'lcov' },
+        { type: 'json' }
+      ]
     },
 
     port: 8080,
@@ -31,8 +34,29 @@ module.exports = function(config) {
 
     autoWatch: false,
 
-    browsers: ['PhantomJS'],
+    customLaunchers: { 
+      PhantomJS_custom: {
+        base: 'PhantomJS',
+        options: {
+          viewportSize: { width: 1280, height: 720 }
+        },
+        debug: false
+      },
+      PhantomJS_debug: {
+        base: 'PhantomJS',
+        options: {
+          viewportSize: { width: 1280, height: 720 }
+        },
+        debug: true
+      }
+    },
 
-    singleRun: true
+    //browserNoActivityTimeout: 60000,
+
+    browsers: ['PhantomJS_custom']
+    //browsers: ['PhantomJS_debug']
+    //browsers: ['Firefox']
+    //browsers: ['Chrome']
+    //browsers: ['PhantomJS_custom', 'Firefox']
   });
 };
