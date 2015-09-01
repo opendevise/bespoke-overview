@@ -33,7 +33,7 @@ module.exports = function(opts) {
         return element.getBoundingClientRect().width / element.offsetWidth;
       },
       getZoomFactor = function(element) {
-        if ('zoom' in element.style) return parseFloat(element.style.zoom || 1);
+        if ('zoom' in element.style) return parseFloat(element.style.zoom) || undefined;
       },
       getTransitionProperties = function(element) {
         var result = [],
@@ -69,7 +69,7 @@ module.exports = function(opts) {
       onActivate = function(slideEvent) {
         if (!loaded) {
           loaded = true;
-          if (deck.parent.scrollTop > 0) deck.parent.scrollTop = 0;
+          deck.parent.scrollLeft = deck.parent.scrollTop = 0;
           if (!!opts.autostart) setTimeout(openOverview, 100); // slight timeout to allow transitions to prepare
           return;
         }
@@ -152,7 +152,7 @@ module.exports = function(opts) {
           slideY = (deckHeight - scaledSlideHeight) / 2,
           scaledMargin = margin * scale,
           scaledTitleHeight = 0,
-          scrollbarOffset = (baseZoom ? 0 : scrollbarWidth * scale),
+          scrollbarOffset = ('webkitAppearance' in parent.style ? 0 : (scrollbarWidth / 2) / baseScale),
           row = 0, col = 0;
         if (title) {
           if (opts.scaleTitle !== false) {
@@ -254,7 +254,7 @@ module.exports = function(opts) {
             forceReflow(slide, transitionName, 'none', '');
           });
         }
-        if (parent.scrollTop > 0) parent.scrollTop = 0;
+        parent.scrollTop = 0;
         parentClasses.remove('bespoke-overview');
         overviewActive = false;
         if (!!opts.numbers) parentClasses.remove('bespoke-overview-counter');
