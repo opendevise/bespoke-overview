@@ -8,26 +8,25 @@ var simulant = require('simulant'),
 
 describe('bespoke-overview', function() {
   var KEYCODE = { o: 79, enter: 13, up: 38, down: 40 },
+    lastSlideIndex = 9,
     deck,
-    init = false,
+    setup = function() {
+      document.title = 'bespoke-overview tests';
+      var style = document.createElement('style');
+      style.textContent = '*,::before,::after{-moz-box-sizing:inherit;box-sizing:inherit}\n' +
+          'html{-moz-box-sizing:border-box;box-sizing:border-box}\n' +
+          'body{margin:0}\n' +
+          '.bespoke-parent,.bespoke-scale-parent{position:absolute;top:0;right:0;bottom:0;left:0}\n' +
+          '.bespoke-parent{overflow:hidden}\n' +
+          '.bespoke-scale-parent,.bespoke-slide{pointer-events:none}\n' +
+          '.bespoke-slide{opacity:0;background:#eee;position:absolute;top:50%;left:50%;width:640px;margin-left:-320px;height:360px;margin-top:-180px;font-size:2em;line-height:360px;text-align:center;vertical-align:middle}\n' +
+          '.bespoke-active{opacity:1;pointer-events:auto}';
+      document.head.appendChild(style);
+    },
     createDeck = function(overviewOptions) {
-      if (!init) {
-        document.title = 'bespoke-overview tests';
-        var style = document.createElement('style');
-        style.textContent = '*,::before,::after{-moz-box-sizing:inherit;box-sizing:inherit}\n' +
-            'html{-moz-box-sizing:border-box;box-sizing:border-box}\n' +
-            'body{margin:0}\n' +
-            '.bespoke-parent,.bespoke-scale-parent{position:absolute;top:0;right:0;bottom:0;left:0}\n' +
-            '.bespoke-parent{overflow:hidden}\n' +
-            '.bespoke-scale-parent,.bespoke-slide{pointer-events:none}\n' +
-            '.bespoke-slide{opacity:0;background:#eee;position:absolute;top:50%;left:50%;width:640px;margin-left:-320px;height:360px;margin-top:-180px;font-size:2em;line-height:360px;text-align:center;vertical-align:middle}\n' +
-            '.bespoke-active{opacity:1;pointer-events:auto}';
-        document.head.appendChild(style);
-        init = true;
-      }
       var deckParent = document.createElement('article');
       deckParent.className = 'deck';
-      for (var i = 0; i < 10; i++) {
+      for (var i = 0; i <= lastSlideIndex; i++) {
         var section = document.createElement('section');
         section.appendChild(document.createTextNode('' + (i + 1)));
         deckParent.appendChild(section);
@@ -39,11 +38,35 @@ describe('bespoke-overview', function() {
         overview(overviewOptions)
       ]);
     },
+    resetDeck = function() {
+      closeOverview();
+      deck.slide(0);
+    },
     // NOTE insert-css only inserts CSS once, so we shouldn't remove the inserted <style> element
     destroyDeck = function() {
       deck.fire('destroy');
       document.body.removeChild(deck.parent);
       deck = null;
+    },
+    openOverview = function(assertState) {
+      if (assertState === true) {
+        expect(deck.parent.classList).not.toContain('bespoke-overview');
+        pressKey('o');
+        expect(deck.parent.classList).toContain('bespoke-overview');
+      }
+      else if (!deck.parent.classList.contains('bespoke-overview')) {
+        pressKey('o');
+      }
+    },
+    closeOverview = function(assertState) {
+      if (assertState === true) {
+        expect(deck.parent.classList).toContain('bespoke-overview');
+        pressKey('o');
+        expect(deck.parent.classList).not.toContain('bespoke-overview');
+      }
+      else if (deck.parent.classList.contains('bespoke-overview')) {
+        pressKey('o');
+      }
     },
     pressKey = function(value, element, eventData) {
       if (eventData === undefined) eventData = {};
@@ -57,15 +80,14 @@ describe('bespoke-overview', function() {
       return deck.slides.map(function(slide) { return slide.getBoundingClientRect() }); 
     };
 
+  beforeAll(setup);
   afterEach(destroyDeck);
 
   describe('with default options', function() {
-    beforeEach(createDeck.bind(null, undefined));
+    beforeEach(function() { createDeck(); });
 
     describe('styles', function() {
-      beforeEach(function() {
-        deck.slide(0);
-      });
+      beforeEach(resetDeck);
 
       it('inserts CSS before the first child element of <head>', function() {
         var style = document.head.querySelector('style');
@@ -75,9 +97,7 @@ describe('bespoke-overview', function() {
     });
 
     describe('toggle', function() {
-      beforeEach(function() {
-        deck.slide(0);
-      });
+      beforeEach(resetDeck);
 
       it('toggles overview when o key is pressed', function() {
         expect(document.querySelector('.bespoke-overview')).toBeNull();
@@ -92,33 +112,27 @@ describe('bespoke-overview', function() {
 
       // CAUTION depends on viewport size being set in browser configuration
       it('scrolls to the active slide when overview is opened', function(done) {
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
-        deck.slide(deck.slides.length - 1);
-        pressKey('o');
-        expect(deck.parent.classList).toContain('bespoke-overview');
+        deck.slide(lastSlideIndex);
+        openOverview(true);
         if (deck.parent.style.scrollBehavior === 'smooth') {
           setTimeout(function() {
             expect(deck.parent.scrollTop).toBeGreaterThan(0);
-            pressKey('o');
-            expect(deck.parent.classList).not.toContain('bespoke-overview');
+            closeOverview(true);
             expect(deck.parent.scrollTop).toBe(0);
             done();
           }, 250);
         }
         else {
           expect(deck.parent.scrollTop).toBeGreaterThan(0);
-          pressKey('o');
-          expect(deck.parent.classList).not.toContain('bespoke-overview');
+          closeOverview(true);
           expect(deck.parent.scrollTop).toBe(0);
         }
       });
 
       ['o', 'enter'].forEach(function(key) {
         it('closes overview and selects active slide when ' + key + ' key is pressed', function() {
-          expect(deck.parent.classList).not.toContain('bespoke-overview');
-          pressKey('o');
-          expect(deck.parent.classList).toContain('bespoke-overview');
-          deck.slide(1);
+          openOverview(true);
+          deck.next();
           pressKey(key);
           expect(deck.parent.classList).not.toContain('bespoke-overview');
           expect(deck.slide()).toBe(1);
@@ -127,67 +141,54 @@ describe('bespoke-overview', function() {
 
       ['o', 'enter'].forEach(function(key) {
         it('does not close overview when ' + key + ' key is pressed when modifier key is down', function() {
-          expect(deck.parent.classList).not.toContain('bespoke-overview');
-          pressKey('o');
-          expect(deck.parent.classList).toContain('bespoke-overview');
+          openOverview(true);
           pressKey(key, document, { shiftKey: true });
           expect(deck.parent.classList).toContain('bespoke-overview');
-          pressKey('o');
-          expect(deck.parent.classList).not.toContain('bespoke-overview');
         });
       });
 
       it('closes overview when slide is clicked and activates selected slide', function() {
+        openOverview(true);
+        expect(getComputedStyle(deck.slides[2]).cursor).toBe('pointer');
+        clickElement(deck.slides[2]);
         expect(deck.parent.classList).not.toContain('bespoke-overview');
-        pressKey('o');
-        expect(deck.parent.classList).toContain('bespoke-overview');
-        expect(getComputedStyle(deck.slides[1]).cursor).toBe('pointer');
-        clickElement(deck.slides[1]);
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
-        expect(deck.slide()).toBe(1);
+        expect(deck.slide()).toBe(2);
       });
     });
 
     describe('layout and appearance', function() {
-      beforeEach(function() {
-        deck.slide(0);
-      });
+      beforeEach(resetDeck);
 
       it('makes all slides visible in overview mode', function() {
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
         deck.slides.forEach(function(slide) {
-          if (!slide.classList.contains('bespoke-active')) {
+          if (slide.classList.contains('bespoke-active')) {
+            expect(getComputedStyle(slide).opacity).toBe('1');
+          }
+          else {
             expect(getComputedStyle(slide).opacity).toBe('0');
           }
         });
-        pressKey('o');
-        expect(deck.parent.classList).toContain('bespoke-overview');
+        openOverview(true);
         deck.slides.forEach(function(slide) {
           var computedStyle = getComputedStyle(slide);
           expect(computedStyle.opacity).toBe('1');
           expect(computedStyle.visibility).toBe('visible');
         });
-        pressKey('o');
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
       });
 
       it('arranges slides on a grid', function() {
-        var slideBounds;
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
-        slideBounds = getSlideBounds(deck);
+        var slideBounds = getSlideBounds(deck);
         for (var i = 1; i <= 5; i++) {
           expect(slideBounds[i].top).toBe(slideBounds[0].top);
         }
-        pressKey('o');
-        expect(deck.parent.classList).toContain('bespoke-overview');
+        openOverview(true);
         slideBounds = getSlideBounds(deck);
         expect(slideBounds[1].top).toBe(slideBounds[0].top);
         expect(slideBounds[2].top).toBe(slideBounds[0].top);
         expect(slideBounds[3].top).not.toBe(slideBounds[0].top);
         expect(slideBounds[4].top).toBe(slideBounds[3].top);
         expect(slideBounds[5].top).toBe(slideBounds[3].top);
-        pressKey('o');
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
+        closeOverview(true);
         slideBounds = getSlideBounds(deck);
         for (var i = 1; i <= 5; i++) {
           expect(slideBounds[i].top).toBe(slideBounds[0].top);
@@ -195,12 +196,10 @@ describe('bespoke-overview', function() {
       });
 
       it('adds outline around active slide in overview', function() {
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
         deck.slides.forEach(function(slide) {
           expect(getComputedStyle(slide).outlineStyle).toBe('none');
         });
-        pressKey('o');
-        expect(deck.parent.classList).toContain('bespoke-overview');
+        openOverview(true);
         deck.slides.forEach(function(slide) {
           if (slide.classList.contains('bespoke-active')) {
             expect(getComputedStyle(slide).outlineStyle).toBe('solid');
@@ -209,20 +208,16 @@ describe('bespoke-overview', function() {
             expect(getComputedStyle(slide).outlineStyle).toBe('none');
           }
         });
-        pressKey('o');
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
+        closeOverview(true);
         deck.slides.forEach(function(slide) {
           expect(getComputedStyle(slide).outlineStyle).toBe('none');
         });
       });
 
       it('enables scrollbar on deck parent when overview is active', function() {
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
-        pressKey('o');
-        expect(deck.parent.classList).toContain('bespoke-overview');
+        openOverview(true);
         expect(deck.parent.style.overflowY).toEqual('scroll');
-        pressKey('o');
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
+        closeOverview(true);
         expect(deck.parent.style.overflowY).toEqual('');
       });
 
@@ -231,20 +226,18 @@ describe('bespoke-overview', function() {
           var frame = parent.document.querySelector('iframe'),
             frameWidth = parseFloat(getComputedStyle(frame).width),
             resizeFactor = 2;
-          expect(deck.parent.classList).not.toContain('bespoke-overview');
           if (position === 'last') {
-            deck.slide(deck.slides.length - 1);
+            deck.slide(lastSlideIndex);
           }
-          pressKey('o');
-          expect(deck.parent.classList).toContain('bespoke-overview');
+          openOverview(true);
           var slideWidth = deck.slides[0].getBoundingClientRect().width;
           frame.style.width = (frameWidth / resizeFactor) + 'px';
           setTimeout(function() {
             expect(deck.parent.classList).toContain('bespoke-overview');
             var resizedSlideWidth = deck.slides[0].getBoundingClientRect().width;
+            // FIXME add frame style width reset to resetDeck
             frame.style.width = '';
-            pressKey('o');
-            expect(deck.parent.classList).not.toContain('bespoke-overview');
+            closeOverview(true);
             // NOTE it's not exact, so just check that it changes
             expect(resizedSlideWidth).not.toBe(slideWidth);
             done();
@@ -254,84 +247,67 @@ describe('bespoke-overview', function() {
     });
 
     describe('navigation', function() {
-      beforeEach(function() {
-        deck.slide(0);
-      });
+      beforeEach(resetDeck);
 
       it('supports navigation to next slide in overview mode', function() {
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
-        pressKey('o');
-        expect(deck.parent.classList).toContain('bespoke-overview');
+        deck.slide(0);
+        openOverview(true);
         deck.next();
-        pressKey('enter');
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
+        expect(deck.slide()).toBe(1);
+        closeOverview(true);
         expect(deck.slide()).toBe(1);
       });
 
       it('supports navigation to previous slide in overview mode', function() {
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
         deck.slide(1);
-        pressKey('o');
-        expect(deck.parent.classList).toContain('bespoke-overview');
+        openOverview(true);
         deck.prev();
-        pressKey('enter');
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
+        expect(deck.slide()).toBe(0);
+        closeOverview(true);
         expect(deck.slide()).toBe(0);
       });
 
       it('ignores navigation from last slide to next slide in overview mode', function() {
-        var lastSlideIndex = deck.slides.length - 1;
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
         deck.slide(lastSlideIndex);
-        pressKey('o');
-        expect(deck.parent.classList).toContain('bespoke-overview');
+        openOverview(true);
         deck.next();
-        pressKey('enter');
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
+        expect(deck.slide()).toBe(lastSlideIndex);
+        closeOverview(true);
         expect(deck.slide()).toBe(lastSlideIndex);
       });
 
       it('ignores navigation from first slide to previous slide in overview mode', function() {
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
-        pressKey('o');
-        expect(deck.parent.classList).toContain('bespoke-overview');
+        deck.slide(0);
+        openOverview(true);
         deck.prev();
-        pressKey('enter');
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
+        expect(deck.slide()).toBe(0);
+        closeOverview(true);
         expect(deck.slide()).toBe(0);
       });
 
       it('supports navigation to arbitrary slide in overview mode', function() {
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
         deck.slide(1);
-        pressKey('o');
-        expect(deck.parent.classList).toContain('bespoke-overview');
+        openOverview(true);
         deck.slide(2);
-        pressKey('enter');
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
+        closeOverview(true);
         expect(deck.slide()).toBe(2);
       });
 
       it('supports navigation to next row in overview mode', function() {
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
-        pressKey('o');
-        expect(deck.parent.classList).toContain('bespoke-overview');
+        deck.slide(0);
+        openOverview(true);
         pressKey('down');
         expect(deck.slide()).toBe(3);
-        pressKey('o');
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
+        closeOverview(true);
         expect(deck.slide()).toBe(3);
       });
 
       it('supports navigation to previous row in overview mode', function() {
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
         deck.slide(3);
-        pressKey('o');
-        expect(deck.parent.classList).toContain('bespoke-overview');
+        openOverview(true);
         pressKey('up');
         expect(deck.slide()).toBe(0);
-        pressKey('o');
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
+        closeOverview(true);
         expect(deck.slide()).toBe(0);
       });
 
@@ -355,13 +331,11 @@ describe('bespoke-overview', function() {
       beforeEach(createDeck.bind(null, { columns: 4 }));
 
       it('uses the number of columns specified by the columns option', function() {
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
         slideBounds = getSlideBounds(deck);
         for (var i = 1; i <= 7; i++) {
           expect(slideBounds[i].top).toBe(slideBounds[0].top);
         }
-        pressKey('o');
-        expect(deck.parent.classList).toContain('bespoke-overview');
+        openOverview(true);
         slideBounds = getSlideBounds(deck);
         expect(slideBounds[1].top).toBe(slideBounds[0].top);
         expect(slideBounds[2].top).toBe(slideBounds[0].top);
@@ -370,8 +344,7 @@ describe('bespoke-overview', function() {
         expect(slideBounds[5].top).toBe(slideBounds[4].top);
         expect(slideBounds[6].top).toBe(slideBounds[4].top);
         expect(slideBounds[7].top).toBe(slideBounds[4].top);
-        pressKey('o');
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
+        closeOverview(true);
         slideBounds = getSlideBounds(deck);
         for (var i = 1; i <= 7; i++) {
           expect(slideBounds[i].top).toBe(slideBounds[0].top);
@@ -385,8 +358,7 @@ describe('bespoke-overview', function() {
       it('starts in overview mode when the autostart option is true', function(done) {
         setTimeout(function() {
           expect(deck.parent.classList).toContain('bespoke-overview');
-          pressKey('o');
-          expect(deck.parent.classList).not.toContain('bespoke-overview');
+          closeOverview(true);
           done();
         }, 250);
       });
@@ -396,12 +368,10 @@ describe('bespoke-overview', function() {
       beforeEach(createDeck.bind(null, { numbers: true }));
 
       it('adds bespoke-overview-counter class to parent when numbers option is enabled', function() {
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
-        pressKey('o');
-        expect(deck.parent.classList).toContain('bespoke-overview');
+        openOverview(true);
         expect(deck.parent.classList).toContain('bespoke-overview-counter');
-        pressKey('o');
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
+        closeOverview(true);
+        expect(deck.parent.classList).not.toContain('bespoke-overview-counter');
       });
     });
 
