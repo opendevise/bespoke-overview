@@ -97,6 +97,8 @@ p {
 .bespoke-active {
   pointer-events: auto;
   opacity: 1;
+  /* WebKit sometimes requires z-index when using transform-based scaling, though it has no affect on stacking order */
+  z-index: 1;
 }
 
 /* The following declaration disables transitions when navigating in overview and when moving to and from overview */
