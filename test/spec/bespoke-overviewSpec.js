@@ -379,21 +379,90 @@ describe('bespoke-overview', function() {
       beforeEach(createDeck.bind(null, { title: true }));
 
       it('inserts title above overview if title option is enabled', function() {
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
-        pressKey('o');
-        expect(deck.parent.classList).toContain('bespoke-overview');
+        openOverview(true);
         var title = deck.parent.firstElementChild;
         expect(title.classList).toContain('bespoke-title');
         var h1 = title.firstElementChild;
         expect(h1.tagName).toBe('H1');
         expect(h1.textContent).toBe(document.title);
-        pressKey('o');
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
+        closeOverview(true);
         expect(getComputedStyle(title).visibility).toBe('hidden');
-        pressKey('o');
+        openOverview(true);
         expect(getComputedStyle(title).visibility).toBe('visible');
-        pressKey('o');
       });
+    });
+  });
+
+  describe('transitions', function() {
+    beforeAll(function() {
+      var style = document.createElement('style');
+      style.textContent = '.bespoke-slide{-webkit-transition:opacity 0.5s ease;transition:opacity:0.5s ease}\n' +
+          '.bespoke-overview .bespoke-slide{-webkit-transition:none;transition:none}\n' +
+          '.bespoke-overview-to .bespoke-slide{-webkit-transition:-webkit-transform 0.1s ease-out 0s,opacity 0.1s ease-in-out 0.05s;transition:transform 0.1s ease-out 0s,opacity 0.1s ease-in-out 0.05s}\n' +
+          '.bespoke-overview-from .bespoke-slide{-webkit-transition:-webkit-transform 0.1s ease-in-out 0.05s,opacity 0.1s ease-in-out 0s;transition:transform 0.1s ease-in-out 0.05s,opacity 0.1s ease-in-out 0s}\n' +
+          '.no-transition .bespoke-slide{-webkit-transition:none!important;transition:none!important}';
+      document.head.appendChild(style);
+    });
+
+    beforeEach(function() { createDeck(); });
+
+    it('uses transition defined by bespoke-overview-to class when opening overview', function(done) {
+      openOverview(true);
+      expect(deck.parent.classList).toContain('bespoke-overview-to');
+      setTimeout(function() {
+        expect(deck.parent.classList).not.toContain('bespoke-overview-to');
+        done();
+      }, 200);
+    });
+
+    it('uses transition defined by bespoke-overview-from class when closing overview', function(done) {
+      deck.parent.classList.add('no-transition');
+      openOverview(true);
+      deck.parent.classList.remove('no-transition');
+      expect(deck.parent.classList).not.toContain('bespoke-overview-to');
+      closeOverview(true);
+      expect(deck.parent.classList).toContain('bespoke-overview-from');
+      setTimeout(function() {
+        expect(deck.parent.classList).not.toContain('bespoke-overview-from');
+        done();
+      }, 200);
+    });
+
+    it('uses transition defined by bespoke-overview bespoke-slide class when navigating in overview', function() {
+      deck.parent.classList.add('no-transition');
+      openOverview(true);
+      deck.parent.classList.remove('no-transition');
+      expect(deck.parent.classList).not.toContain('bespoke-overview-to');
+      expect(deck.slide()).toBe(0); 
+      deck.next();
+      expect(deck.slide()).toBe(1);
+    });
+
+    it('removes stale transition when opening overview', function(done) {
+      deck.parent.classList.add('no-transition');
+      openOverview(true);
+      deck.parent.classList.remove('no-transition');
+      closeOverview(true);
+      setTimeout(function() {
+        openOverview(true);
+        expect(deck.parent.classList).not.toContain('bespoke-overview-from');
+        setTimeout(function() {
+          expect(deck.parent.classList).not.toContain('bespoke-overview-to');
+          done();
+        }, 200);
+      }, 10);
+    });
+
+    it('removes stale transition when closing overview', function(done) {
+      openOverview(true);
+      setTimeout(function() {
+        closeOverview(true);
+        expect(deck.parent.classList).not.toContain('bespoke-overview-to');
+        setTimeout(function() {
+          expect(deck.parent.classList).not.toContain('bespoke-overview-from');
+          done();
+        }, 200);
+      }, 10);
     });
   });
 });
