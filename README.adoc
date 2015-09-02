@@ -68,6 +68,39 @@ bespoke.from('.deck', [
 ]);
 ```
 
+=== Scaling
+
+If you're using the https://github.com/markdalgleish/bespoke-scale[bespoke-scale] plugin, you _must_ specify the scaling method explicitly to ensure zoom-based scaling is only used for browsers that use WebKit.
+This configuration ensures that both the scale and overview plugins work in Internet Explorer 10 and above (as well as Opera/Presto). _IE 9 and below are not supported by Bespoke.js._
+
+When using CommonJS modules:
+
+```js
+var html = document.documentElement;
+
+bespoke.from('.deck', [
+  // ...
+  scale('webkitAppearance' in html.style ? 'zoom' : 'transform'),
+  overview();
+]);
+```
+
+When using browser globals:
+
+```js
+var bespoke = require('bespoke'),
+  // ...
+  scale = require('bespoke-scale'),
+  overview = require('bespoke-overview'),
+  html = document.documentElement;
+
+bespoke.from('.deck', [
+  // ...
+  bespoke.plugins.scale('webkitAppearance' in html.style ? 'zoom' : 'transform'),
+  bespoke.plugins.overview();
+]);
+```
+
 === Options
 
 The following options are available to the bespoke-plugin:
