@@ -157,7 +157,7 @@ module.exports = function(opts) {
           slideY = (deckHeight - scaledSlideHeight) / 2,
           scaledMargin = margin * scale,
           scaledTitleHeight = 0,
-          scrollbarOffset = ('webkitAppearance' in parent.style ? 0 : (scrollbarWidth / 2) / baseScale),
+          scrollbarOffset = ('webkitAppearance' in parent.style || window.opera ? 0 : (scrollbarWidth / 2) / baseScale),
           row = 0, col = 0;
         if (title) {
           if (opts.scaleTitle !== false) {
