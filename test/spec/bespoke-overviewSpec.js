@@ -373,10 +373,10 @@ describe('bespoke-overview', function() {
       });
     });
 
-    describe('numbers option', function() {
-      beforeEach(createDeck.bind(null, { numbers: true }));
+    describe('counter option', function() {
+      beforeEach(createDeck.bind(null, { counter: true }));
 
-      it('adds bespoke-overview-counter class to parent when numbers option is enabled', function() {
+      it('adds bespoke-overview-counter class to parent when counter option is enabled', function() {
         openOverview(true);
         expect(deck.parent.classList).toContain('bespoke-overview-counter');
         closeOverview(true);

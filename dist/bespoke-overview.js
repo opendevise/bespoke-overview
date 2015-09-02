@@ -136,7 +136,7 @@ module.exports = function(opts) {
           deck.slide(activeSlideIndex, { preview: true });
           parentClasses.add('bespoke-overview');
           overviewActive = true;
-          if (!!opts.numbers) parentClasses.add('bespoke-overview-counter');
+          if (!!opts.counter) parentClasses.add('bespoke-overview-counter');
           parentClasses.add('bespoke-overview-to');
           numTransitions = (lastSlideIndex > 0 ? getTransitionProperties(sampleSlide).length :
               (getTransitionProperties(sampleSlide).indexOf('transform') >= 0 ? 1 : 0));
@@ -173,9 +173,8 @@ module.exports = function(opts) {
         slides.forEach(function(slide) {
           var x = col * scaledSlideWidth + (col + 1) * scaledMargin - scrollbarOffset - slideX,
             y = row * scaledSlideHeight + (row + 1) * scaledMargin + scaledTitleHeight - slideY;
-          // NOTE drop exponential notation in near-zero numbers (since it breaks older WebKit engines)
-          if (x.toString().indexOf('e-') !== -1) x = 0;
-          if (y.toString().indexOf('e-') !== -1) y = 0;
+          if (x.toString().indexOf('e-') !== -1) x = 0; // drop scientific notation for numbers ~0 as it confuses WebKit
+          if (y.toString().indexOf('e-') !== -1) y = 0; // drop scientific notation for numbers ~0 as it confuses WebKit
           slide.style[transformName] = 'translate(' + x + 'px, ' + y + 'px) scale(' + scale + ')';
           // NOTE add margin to last slide to leave gap below last row; doesn't work in Firefox
           // HACK setting marginBottom forces Webkit to reflow content and forces scrollbar to recalculate
@@ -261,7 +260,7 @@ module.exports = function(opts) {
         parent.scrollTop = 0;
         parentClasses.remove('bespoke-overview');
         overviewActive = false;
-        if (!!opts.numbers) parentClasses.remove('bespoke-overview-counter');
+        if (!!opts.counter) parentClasses.remove('bespoke-overview-counter');
         parentClasses.add('bespoke-overview-from');
         var numTransitions = (lastSlideIndex > 0 ? getTransitionProperties(sampleSlide).length :
             (getTransitionProperties(sampleSlide).indexOf('transform') >= 0 ? 1 : 0));

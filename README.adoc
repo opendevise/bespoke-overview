@@ -115,7 +115,7 @@ This value is scaled alone with the slides in overview mode.
 autostart _(type: boolean, default: false)_::
 A flag that controls whether the presentation starts in overview mode.
 
-numbers _(type: boolean, default: false)_::
+counter _(type: boolean, default: false)_::
 A flag that controls whether numbers are shown on the slides when in overview mode.
 When enabled, adds the `bespoke-overview-counter` class to the deck parent element.
 The style of the numbers can be controlled using the `.bespoke-overview-counter .bespoke-slide::after` CSS selector.
@@ -137,7 +137,7 @@ Here's an example showing many of the options in use:
 bespoke.from('.deck', [
   classes(),
   keys(),
-  overview({ columns: 2, margin: 10, autostart: true, numbers: true, title: true })
+  overview({ columns: 2, margin: 10, autostart: true, counter: true, title: true })
 ]);
 ```
 

@@ -7,7 +7,7 @@ var parent = document.querySelector('.deck'),
     bespoke.plugins.scale('webkitAppearance' in parent.style ? 'zoom' : 'transform'),
     //bespoke.plugins.scale('transform'),
     bespoke.plugins.overview()
-    //bespoke.plugins.overview({ columns: 2, margin: 10, autostart: true, title: true, numbers: true })
+    //bespoke.plugins.overview({ columns: 2, margin: 10, autostart: true, counter: true, title: true })
   ]);
 
 // expose API to other applications
