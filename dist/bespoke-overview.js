@@ -78,6 +78,16 @@ module.exports = function(opts) {
       scrollSlideIntoView = function(slide, index, zoomFactor) {
         deck.parent.scrollTop = (index < columns ? 0 :
             deck.parent.scrollTop + slide.getBoundingClientRect().top * (zoomFactor || 1));
+        //if (index < columns) {
+        //  deck.parent.scrollTop = 0;
+        //}
+        //else {
+        //  var slideRect = slide.getBoundingClientRect(), overflow;
+        //  if ((overflow = slideRect.top * (zoomFactor || 1)) < 0 ||
+        //      (overflow = slideRect.bottom * (zoomFactor || 1) - deck.parent.offsetHeight) > 0) {
+        //    deck.parent.scrollTop += overflow;
+        //  }
+        //}
       },
       removeAfterTransition = function(direction, parentClasses, slide, slideAlt) {
         slide.removeEventListener(TRANSITIONEND, afterTransition, false);
