@@ -51,9 +51,9 @@ module.exports = function(opts) {
       },
       // NOTE forces browser to apply style changes immediately, hence forcing a reflow
       forceReflow = function(element, property, from, to) {
-        if (property !== undefined) element.style[property] = from;
+        if (property) element.style[property] = from;
         element.offsetHeight; // jshint ignore: line
-        if (property !== undefined) element.style[property] = to;
+        if (property) element.style[property] = to;
       },
       onSlideClick = function() {
         closeOverview(deck.slides.indexOf(this));
@@ -130,7 +130,7 @@ module.exports = function(opts) {
         else if ((zoomFactor = getZoomFactor(sampleSlide))) {
           baseScale = zoomFactor;
         }
-        if (afterTransition !== undefined) removeAfterTransition('from', parentClasses, slides[0], slides[lastSlideIndex]);
+        if (afterTransition) removeAfterTransition('from', parentClasses, slides[0], slides[lastSlideIndex]);
         if (!!opts.title) title = getOrCreateTitle(parent);
         if (initial) {
           deck.slide(activeSlideIndex, { preview: true });
@@ -232,7 +232,7 @@ module.exports = function(opts) {
         else if (!(baseScale = getZoomFactor(sampleSlide))) {
           baseScale = 1;
         }
-        if (afterTransition !== undefined) removeAfterTransition('to', parentClasses, slides[0], slides[lastSlideIndex]);
+        if (afterTransition) removeAfterTransition('to', parentClasses, slides[0], slides[lastSlideIndex]);
         var yShift = parent.scrollTop / baseScale;
         // NOTE xShift compensates for horizontal shift that occurs when the scrollbar is removed in Webkit
         var xShift = 'webkitAppearance' in parent.style ? 0 : undefined;
