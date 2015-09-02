@@ -450,7 +450,7 @@ describe('bespoke-overview', function() {
           expect(deck.parent.classList).not.toContain('bespoke-overview-to');
           done();
         }, 200);
-      }, 10);
+      }, 50);
     });
 
     it('removes stale transition when closing overview', function(done) {
@@ -462,7 +462,7 @@ describe('bespoke-overview', function() {
           expect(deck.parent.classList).not.toContain('bespoke-overview-from');
           done();
         }, 200);
-      }, 10);
+      }, 50);
     });
   });
 });
