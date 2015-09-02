@@ -1,5 +1,5 @@
 = bespoke-overview
-Dan Allen
+Dan Allen <https://github.com/mojavelinux>
 // Settings:
 :idprefix:
 :idseparator: -
@@ -13,8 +13,8 @@ ifdef::badges[]
 image:https://img.shields.io/travis/opendevise/bespoke-overview/master.svg[Build Status (Travis CI), link=https://travis-ci.org/opendevise/bespoke-overview]
 endif::[]
 
-The bespoke-overview plugin presents an overview of all the slides when the kbd:[o] is pressed in a http://markdalgleish.com/projects/bespoke.js[Bespoke.js] presentation.
-The overview mode gives you a “big picture” view of the presentation.
+When the kbd:[o] key is pressed in a http://markdalgleish.com/projects/bespoke.js[Bespoke.js] presentation with the bespoke-overview plugin enabled, all the slides are presented in a grid.
+This overview mode gives you a “big picture” view of the presentation.
 It can also be used as a navigation aid to jump to an arbitrary slide.
 
 image::demo/screenshot.png[Screenshot of bespoke-overview]
@@ -149,7 +149,6 @@ The overview plugin should be applied in the following order relative to other p
 * bespoke-scale
 * *bespoke-overview*
 * bespoke-bullets
-* bespoke-multimedia
 
 The placement of other plugins doesn't result in any known problems.
 
@@ -202,9 +201,9 @@ Conversely, the `bespoke-overview-from` class is added to the deck parent when t
 
 IMPORTANT: The transform origin is assumed to be 50% 50% (i.e., the center of the slide).
 
-NOTE: The `bespoke-overview` class is removed immediately when the overview mode is deactivated, whereas the `bespoke-overview-from` class remains on the deck parent element until all slide transitions, if any, are complete.
+NOTE: The `bespoke-overview` class is immediately removed from the deck parent element when the overview mode is deactivated, whereas the `bespoke-overview-from` class remains on the element until all slide transitions, if any, are complete.
 
-TIP: If you want to defer a style change until the transition into overview mode is complete, using the CSS selector `.bespoke-overview:not(.bespoke-overview-to)`.
+TIP: If you want to defer a style change until the transition into overview mode is complete, use the CSS selector `.bespoke-overview:not(.bespoke-overview-to)`.
 
 .Understanding z-index values
 ****
@@ -215,7 +214,7 @@ Under these conditions, the active slide may not appear on top when transitionin
 
 === Default transitions
 
-By default, overview mode will use the same transitions that are applied to the slides themselves.
+By default, overview mode uses the same transitions that are applied to the slides themselves.
 If you do not use transitions on the slides in your presentation, then transitions will not be used when you toggle overview mode.
 
 === Disabling transitions
