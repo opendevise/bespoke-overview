@@ -161,12 +161,8 @@ describe('bespoke-overview', function() {
 
       it('makes all slides visible in overview mode', function() {
         deck.slides.forEach(function(slide) {
-          if (slide.classList.contains('bespoke-active')) {
-            expect(getComputedStyle(slide).opacity).toBe('1');
-          }
-          else {
-            expect(getComputedStyle(slide).opacity).toBe('0');
-          }
+          var computedStyle = getComputedStyle(slide);
+          expect(computedStyle.opacity).toBe(slide.classList.contains('bespoke-active') ? '1' : '0');
         });
         openOverview(true);
         deck.slides.forEach(function(slide) {
@@ -195,6 +191,26 @@ describe('bespoke-overview', function() {
         }
       });
 
+      it('enables scrollbar on deck parent when overview is active', function() {
+        openOverview(true);
+        expect(deck.parent.style.overflowY).toEqual('scroll');
+        closeOverview(true);
+        expect(deck.parent.style.overflowY).toEqual('');
+      });
+
+      it('accounts for scrollbar width when calculating position of slides in overview', function() {
+        openOverview(true);
+        var slideRect = deck.slides[0].getBoundingClientRect();
+        expect(slideRect.left).toBeCloseTo(slideRect.top, 0); // within 0.5
+        var baseZoom = parseFloat(deck.slides[0].style.zoom);
+        if (baseZoom) {
+          expect(deck.parent.clientWidth / baseZoom - deck.slides[2].getBoundingClientRect().right).toBeCloseTo(slideRect.left, 4);
+        }
+        else {
+          expect(deck.parent.clientWidth - deck.slides[2].getBoundingClientRect().right).toBeCloseTo(slideRect.left, 1); // within 0.05
+        }
+      });
+
       it('adds outline around active slide in overview', function() {
         deck.slides.forEach(function(slide) {
           expect(getComputedStyle(slide).outlineStyle).toBe('none');
@@ -212,13 +228,6 @@ describe('bespoke-overview', function() {
         deck.slides.forEach(function(slide) {
           expect(getComputedStyle(slide).outlineStyle).toBe('none');
         });
-      });
-
-      it('enables scrollbar on deck parent when overview is active', function() {
-        openOverview(true);
-        expect(deck.parent.style.overflowY).toEqual('scroll');
-        closeOverview(true);
-        expect(deck.parent.style.overflowY).toEqual('');
       });
 
       ['first', 'last'].forEach(function(position) {
