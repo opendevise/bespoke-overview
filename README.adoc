@@ -13,7 +13,7 @@ ifdef::badges[]
 image:https://img.shields.io/travis/opendevise/bespoke-overview/master.svg[Build Status (Travis CI), link=https://travis-ci.org/opendevise/bespoke-overview]
 endif::[]
 
-When the kbd:[o] key is pressed in a http://markdalgleish.com/projects/bespoke.js[Bespoke.js] presentation with the bespoke-overview plugin enabled, all the slides are presented in a grid.
+This plugin adds an overview mode to a http://markdalgleish.com/projects/bespoke.js[Bespoke.js] presentation, which arranges all the slides in the deck on a grid when the kbd:[o] key is pressed.
 This overview mode gives you a “big picture” view of the presentation.
 It can also be used as a navigation aid to jump to an arbitrary slide.
 
