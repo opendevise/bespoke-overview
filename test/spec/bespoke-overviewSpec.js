@@ -19,13 +19,14 @@ describe('bespoke-overview', function() {
           '.bespoke-parent,.bespoke-scale-parent{position:absolute;top:0;right:0;bottom:0;left:0}\n' +
           '.bespoke-parent{overflow:hidden}\n' +
           '.bespoke-scale-parent,.bespoke-slide{pointer-events:none}\n' +
-          '.bespoke-slide{opacity:0;background:#eee;position:absolute;top:50%;left:50%;width:640px;margin-left:-320px;height:360px;margin-top:-180px;font-size:2em;line-height:360px;text-align:center;vertical-align:middle}\n' +
+          '.bespoke-slide{opacity:0;background:#eee;position:absolute;top:50%;left:50%;width:320px;margin-left:-160px;height:180px;margin-top:-90px;font-size:2em;line-height:180px;text-align:center;vertical-align:middle}\n' +
           '.bespoke-active{opacity:1;pointer-events:auto}';
       document.head.appendChild(style);
     },
     createDeck = function(overviewOptions) {
       var deckParent = document.createElement('article');
       deckParent.className = 'deck';
+      resizeDeck(deckParent, 640, 360, false);
       for (var i = 0; i <= lastSlideIndex; i++) {
         var section = document.createElement('section');
         section.appendChild(document.createTextNode('' + (i + 1)));
@@ -37,6 +38,16 @@ describe('bespoke-overview', function() {
         scale(),
         overview(overviewOptions)
       ]);
+    },
+    resizeDeck = function(deckParent, width, height, fireEvent) {
+      deckParent.style.width = width + 'px';
+      deckParent.style.height = height + 'px';
+      if (fireEvent !== false) {
+        // FIXME this way of creating events is deprecated
+        var e = document.createEvent('UIEvents');
+        e.initUIEvent('resize', true, false, window, 0);
+        window.dispatchEvent(e);
+      }
     },
     resetDeck = function() {
       closeOverview();
@@ -199,15 +210,24 @@ describe('bespoke-overview', function() {
       });
 
       it('accounts for scrollbar width when calculating position of slides in overview', function() {
+        resizeDeck(deck.parent, 960, 540);
         openOverview(true);
-        var slideRect = deck.slides[0].getBoundingClientRect();
-        expect(slideRect.left).toBeCloseTo(slideRect.top, 0); // within 0.5
-        var baseZoom = parseFloat(deck.slides[0].style.zoom);
-        if (baseZoom) {
-          expect(deck.parent.clientWidth / baseZoom - deck.slides[2].getBoundingClientRect().right).toBeCloseTo(slideRect.left, 4);
+        var leftMostSlideRect = deck.slides[0].getBoundingClientRect(),
+          rightMostSlideRect = deck.slides[2].getBoundingClientRect(),
+          deckWidth = deck.parent.clientWidth,
+          baseZoom = deck.slides[0].style.zoom;
+        resizeDeck(deck.parent, 640, 360);
+        if ('webkitAppearance' in deck.parent.style) {
+          expect(leftMostSlideRect.left).toBeCloseTo(leftMostSlideRect.top, 4); // within 0.00005
+          if (!baseZoom || !(baseZoom = parseFloat(baseZoom))) {
+            baseZoom = 1;
+          }
+          expect(deckWidth / baseZoom - rightMostSlideRect.right).toBeCloseTo(leftMostSlideRect.left, 4); // within 0.00005
         }
         else {
-          expect(deck.parent.clientWidth - deck.slides[2].getBoundingClientRect().right).toBeCloseTo(slideRect.left, 1); // within 0.05
+          // NOTE values are much less accurate in Firefox (or so it seems)
+          expect(leftMostSlideRect.left).toBeCloseTo(leftMostSlideRect.top, 0); // within 0.5
+          expect(deckWidth - rightMostSlideRect.right).toBeCloseTo(leftMostSlideRect.left, 0); // within 0.5
         }
       });
 
@@ -231,26 +251,26 @@ describe('bespoke-overview', function() {
       });
 
       ['first', 'last'].forEach(function(position) {
-        it('recalculates grid layout on window resize when ' + position + ' slide is selected', function(done) {
-          var frame = parent.document.querySelector('iframe'),
-            frameWidth = parseFloat(getComputedStyle(frame).width),
-            resizeFactor = 2;
+        it('recalculates grid layout on window resize when ' + position + ' slide is selected', function() {
           if (position === 'last') {
             deck.slide(lastSlideIndex);
           }
           openOverview(true);
-          var slideWidth = deck.slides[0].getBoundingClientRect().width;
-          frame.style.width = (frameWidth / resizeFactor) + 'px';
-          setTimeout(function() {
-            expect(deck.parent.classList).toContain('bespoke-overview');
-            var resizedSlideWidth = deck.slides[0].getBoundingClientRect().width;
-            // FIXME add frame style width reset to resetDeck
-            frame.style.width = '';
-            closeOverview(true);
-            // NOTE it's not exact, so just check that it changes
+          var firstSlide = deck.slides[0],
+            slideWidth = firstSlide.getBoundingClientRect().width;
+          resizeDeck(deck.parent, 320, 180);
+          expect(deck.parent.classList).toContain('bespoke-overview');
+          var resizedSlideWidth = firstSlide.getBoundingClientRect().width;
+          // TODO add deck size to resetDeck
+          resizeDeck(deck.parent, 640, 360);
+          closeOverview(true);
+          if ('webkitAppearance' in firstSlide.style) {
+            // NOTE calculation depends on scaling method, so for now just verify it changes
             expect(resizedSlideWidth).not.toBe(slideWidth);
-            done();
-          }, 100);
+          }
+          else {
+            expect(slideWidth / resizedSlideWidth).toBeCloseTo(2, 1);
+          }
         });
       });
     });
@@ -389,9 +409,9 @@ describe('bespoke-overview', function() {
 
       it('inserts title above overview if title option is enabled', function() {
         openOverview(true);
-        var title = deck.parent.firstElementChild;
+        var title = deck.parent.firstElementChild,
+          h1 = title.firstElementChild;
         expect(title.classList).toContain('bespoke-title');
-        var h1 = title.firstElementChild;
         expect(h1.tagName).toBe('H1');
         expect(h1.textContent).toBe(document.title);
         closeOverview(true);
