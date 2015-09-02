@@ -191,11 +191,10 @@ module.exports = function(opts) {
         });
         if (initial) {
           if (numTransitions > 0) {
-            var activeTransitions = numTransitions;
             sampleSlide.addEventListener(TRANSITIONEND, (afterTransition = function(e) {
-              if (e.target === this && (activeTransitions -= 1) === 0) {
+              if (e.target === this && (numTransitions -= 1) === 0) {
                 removeAfterTransition('to', parentClasses, this);
-                if ('webkitAppearance' in parent.style && parent.scrollHeight > parent.offsetHeight) {
+                if ('webkitAppearance' in parent.style && parent.scrollHeight > parent.clientHeight) {
                   // NOTE kick scrollbar when it fails to awaken from zombie state
                   forceReflow(parent, 'overflowY', 'auto', 'scroll');
                 }
@@ -268,9 +267,8 @@ module.exports = function(opts) {
             (getTransitionProperties(sampleSlide).indexOf('transform') >= 0 ? 1 : 0));
         slides.forEach(function(slide) { slide.style[transformName] = ''; });
         if (numTransitions > 0) {
-          var activeTransitions = numTransitions;
           sampleSlide.addEventListener(TRANSITIONEND, (afterTransition = function(e) {
-            if (e.target === this && (activeTransitions -= 1) === 0) removeAfterTransition('from', parentClasses, this);
+            if (e.target === this && (numTransitions -= 1) === 0) removeAfterTransition('from', parentClasses, this);
           }), false);
         }
         else {
