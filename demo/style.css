@@ -42,6 +42,7 @@ p {
   position: absolute;
   top: 0;
   left: 0;
+  /* NOTE could use width: 100vw instead of right: 0, though doesn't have same effect in all browsers */
   right: 0;
   bottom: 0;
 }
@@ -49,11 +50,6 @@ p {
 .bespoke-parent {
   /* IMPORTANT only put overflow on parent, not other slide wrapper elements */
   overflow: hidden;
-}
-
-.bespoke-scale-parent {
-  /* set width to 100vw to fix scrollbar calculation in Firefox */
-  width: 100vw;
 }
 
 .bespoke-parent > :not(.bespoke-slide),
