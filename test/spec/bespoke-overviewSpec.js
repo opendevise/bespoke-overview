@@ -8,6 +8,7 @@ var simulant = require('simulant'),
 
 describe('bespoke-overview', function() {
   var KEYCODE = { o: 79, enter: 13, up: 38, down: 40 },
+    isWebKit = 'webkitAppearance' in document.documentElement.style,
     lastSlideIndex = 9,
     deck,
     setup = function() {
@@ -23,21 +24,30 @@ describe('bespoke-overview', function() {
           '.bespoke-active{opacity:1;pointer-events:auto}';
       document.head.appendChild(style);
     },
-    createDeck = function(overviewOptions) {
+    createDeck = function(enableScale, overviewPluginOptions) {
       var deckParent = document.createElement('article');
       deckParent.className = 'deck';
-      resizeDeck(deckParent, 640, 360, false);
+      resizeDeck(deckParent, 800, 450, false);
       for (var i = 0; i <= lastSlideIndex; i++) {
         var section = document.createElement('section');
         section.appendChild(document.createTextNode('' + (i + 1)));
         deckParent.appendChild(section);
       }
       document.body.appendChild(deckParent);
-      deck = bespoke.from('.deck', [
-        classes(),
-        scale(),
-        overview(overviewOptions)
-      ]);
+      if (enableScale === false) {
+        deck = bespoke.from('.deck', [
+          classes(),
+          overview(overviewPluginOptions)
+        ]);
+      }
+      else {
+        deck = bespoke.from('.deck', [
+          classes(),
+          scale(isWebKit ? 'zoom' : 'transform'),
+          //scale('transform'),
+          overview(overviewPluginOptions)
+        ]);
+      }
     },
     resizeDeck = function(deckParent, width, height, fireEvent) {
       deckParent.style.width = width + 'px';
@@ -94,279 +104,280 @@ describe('bespoke-overview', function() {
   beforeAll(setup);
   afterEach(destroyDeck);
 
-  describe('with default options', function() {
-    beforeEach(function() { createDeck(); });
-
-    describe('styles', function() {
-      beforeEach(resetDeck);
-
-      it('inserts CSS before the first child element of <head>', function() {
-        var style = document.head.querySelector('style');
-        expect(style).toBeDefined();
-        expect(style.textContent).toContain('.bespoke-overview');
-      });
+  describe('styles', function() {
+    it('inserts CSS before the first child element of <head>', function() {
+      createDeck();
+      var style = document.head.querySelector('style');
+      expect(style).toBeDefined();
+      expect(style.textContent).toContain('.bespoke-overview');
     });
+  });
 
-    describe('toggle', function() {
-      beforeEach(resetDeck);
+  [false, true].forEach(function(enableScale) {
+    describe('with default options and scale() ' + (enableScale ? 'enabled' : 'disabled'), function() {
+      beforeEach(function() { createDeck(enableScale); });
 
-      it('toggles overview when o key is pressed', function() {
-        expect(document.querySelector('.bespoke-overview')).toBeNull();
-        pressKey('o');
-        var overviewNodes = document.querySelectorAll('.bespoke-overview');
-        expect(overviewNodes.length).toEqual(1);
-        expect(overviewNodes[0]).toEqual(deck.parent);
-        expect(deck.parent.classList).toContain('bespoke-overview');
-        pressKey('o');
-        expect(document.querySelector('.bespoke-overview')).toBeNull();
-      });
+      describe('toggle', function() {
+        beforeEach(resetDeck);
 
-      // CAUTION depends on viewport size being set in browser configuration
-      it('scrolls to the active slide when overview is opened', function(done) {
-        deck.slide(lastSlideIndex);
-        openOverview(true);
-        if (deck.parent.style.scrollBehavior === 'smooth') {
-          setTimeout(function() {
+        it('toggles overview when o key is pressed', function() {
+          expect(document.querySelector('.bespoke-overview')).toBeNull();
+          pressKey('o');
+          var overviewNodes = document.querySelectorAll('.bespoke-overview');
+          expect(overviewNodes.length).toEqual(1);
+          expect(overviewNodes[0]).toEqual(deck.parent);
+          expect(deck.parent.classList).toContain('bespoke-overview');
+          pressKey('o');
+          expect(document.querySelector('.bespoke-overview')).toBeNull();
+        });
+
+        // CAUTION depends on viewport size being set in browser configuration
+        it('scrolls to the active slide when overview is opened', function(done) {
+          deck.slide(lastSlideIndex);
+          openOverview(true);
+          if (deck.parent.style.scrollBehavior === 'smooth') {
+            setTimeout(function() {
+              expect(deck.parent.scrollTop).toBeGreaterThan(0);
+              closeOverview(true);
+              expect(deck.parent.scrollTop).toBe(0);
+              done();
+            }, 250);
+          }
+          else {
             expect(deck.parent.scrollTop).toBeGreaterThan(0);
             closeOverview(true);
             expect(deck.parent.scrollTop).toBe(0);
-            done();
-          }, 250);
-        }
-        else {
-          expect(deck.parent.scrollTop).toBeGreaterThan(0);
-          closeOverview(true);
-          expect(deck.parent.scrollTop).toBe(0);
-        }
+          }
+        });
+
+        ['o', 'enter'].forEach(function(key) {
+          it('closes overview and selects active slide when ' + key + ' key is pressed', function() {
+            openOverview(true);
+            deck.next();
+            pressKey(key);
+            expect(deck.parent.classList).not.toContain('bespoke-overview');
+            expect(deck.slide()).toBe(1);
+          });
+        });
+
+        ['o', 'enter'].forEach(function(key) {
+          it('does not close overview when ' + key + ' key is pressed when modifier key is down', function() {
+            openOverview(true);
+            pressKey(key, document, { shiftKey: true });
+            expect(deck.parent.classList).toContain('bespoke-overview');
+          });
+        });
+
+        it('closes overview when slide is clicked and activates selected slide', function() {
+          openOverview(true);
+          expect(getComputedStyle(deck.slides[2]).cursor).toBe('pointer');
+          clickElement(deck.slides[2]);
+          expect(deck.parent.classList).not.toContain('bespoke-overview');
+          expect(deck.slide()).toBe(2);
+        });
       });
 
-      ['o', 'enter'].forEach(function(key) {
-        it('closes overview and selects active slide when ' + key + ' key is pressed', function() {
+      describe('layout and appearance', function() {
+        beforeEach(resetDeck);
+
+        it('makes all slides visible in overview mode', function() {
+          deck.slides.forEach(function(slide) {
+            var computedStyle = getComputedStyle(slide);
+            expect(computedStyle.opacity).toBe(slide.classList.contains('bespoke-active') ? '1' : '0');
+          });
+          openOverview(true);
+          deck.slides.forEach(function(slide) {
+            var computedStyle = getComputedStyle(slide);
+            expect(computedStyle.opacity).toBe('1');
+            expect(computedStyle.visibility).toBe('visible');
+          });
+        });
+
+        it('arranges slides on a grid', function() {
+          var slideBounds = getSlideBounds(deck);
+          for (var i = 1; i <= 5; i++) {
+            expect(slideBounds[i].top).toBe(slideBounds[0].top);
+          }
+          openOverview(true);
+          slideBounds = getSlideBounds(deck);
+          expect(slideBounds[1].top).toBe(slideBounds[0].top);
+          expect(slideBounds[2].top).toBe(slideBounds[0].top);
+          expect(slideBounds[3].top).not.toBe(slideBounds[0].top);
+          expect(slideBounds[4].top).toBe(slideBounds[3].top);
+          expect(slideBounds[5].top).toBe(slideBounds[3].top);
+          closeOverview(true);
+          slideBounds = getSlideBounds(deck);
+          for (var i = 1; i <= 5; i++) {
+            expect(slideBounds[i].top).toBe(slideBounds[0].top);
+          }
+        });
+
+        it('should return slide to original position after closing overview', function() {
+          var before = deck.slides[0].getBoundingClientRect();
+          openOverview(true);
+          closeOverview(true);
+          var after = deck.slides[0].getBoundingClientRect();
+          expect(before.left).toBe(after.left);
+          expect(before.top).toBe(after.top);
+        });
+
+        it('enables scrollbar on deck parent when overview is active', function() {
+          openOverview(true);
+          expect(deck.parent.style.overflowY).toEqual('scroll');
+          closeOverview(true);
+          expect(deck.parent.style.overflowY).toEqual('');
+        });
+
+        it('accounts for scrollbar width when calculating position of slides in overview', function() {
+          resizeDeck(deck.parent, 960, 540);
+          openOverview(true);
+          var leftMostSlideRect = deck.slides[0].getBoundingClientRect(),
+            rightMostSlideRect = deck.slides[2].getBoundingClientRect(),
+            deckWidth = deck.parent.clientWidth,
+            baseZoom = deck.slides[0].style.zoom;
+          resizeDeck(deck.parent, 800, 450);
+          if (isWebKit) {
+            expect(leftMostSlideRect.left).toBeCloseTo(leftMostSlideRect.top, 4); // within 0.00005
+            if (!baseZoom || !(baseZoom = parseFloat(baseZoom))) {
+              baseZoom = 1;
+            }
+            expect(deckWidth / baseZoom - rightMostSlideRect.right).toBeCloseTo(leftMostSlideRect.left, 4); // within 0.00005
+          }
+          else {
+            // NOTE values are much less accurate in Firefox (or so it seems)
+            expect(leftMostSlideRect.left).toBeCloseTo(leftMostSlideRect.top, 0); // within 0.5
+            expect(deckWidth - rightMostSlideRect.right).toBeCloseTo(leftMostSlideRect.left, 0); // within 0.5
+          }
+        });
+
+        it('adds outline around active slide in overview', function() {
+          deck.slides.forEach(function(slide) {
+            expect(getComputedStyle(slide).outlineStyle).toBe('none');
+          });
+          openOverview(true);
+          deck.slides.forEach(function(slide) {
+            if (slide.classList.contains('bespoke-active')) {
+              expect(getComputedStyle(slide).outlineStyle).toBe('solid');
+            }
+            else {
+              expect(getComputedStyle(slide).outlineStyle).toBe('none');
+            }
+          });
+          closeOverview(true);
+          deck.slides.forEach(function(slide) {
+            expect(getComputedStyle(slide).outlineStyle).toBe('none');
+          });
+        });
+
+        ['first', 'last'].forEach(function(position) {
+          it('recalculates grid layout on window resize when ' + position + ' slide is selected', function() {
+            if (position === 'last') {
+              deck.slide(lastSlideIndex);
+            }
+            openOverview(true);
+            var firstSlide = deck.slides[0],
+              slideWidth = firstSlide.getBoundingClientRect().width;
+            resizeDeck(deck.parent, 320, 180);
+            expect(deck.parent.classList).toContain('bespoke-overview');
+            var resizedSlideWidth = firstSlide.getBoundingClientRect().width;
+            // TODO add deck size to resetDeck
+            resizeDeck(deck.parent, 800, 450);
+            closeOverview(true);
+            if (isWebKit) {
+              // NOTE calculation depends on scaling method, so for now just verify it changes
+              expect(resizedSlideWidth).not.toBe(slideWidth);
+            }
+            else {
+              expect(slideWidth / resizedSlideWidth).toBeCloseTo(2.5, 1);
+            }
+          });
+        });
+      });
+
+      describe('navigation', function() {
+        beforeEach(resetDeck);
+
+        it('supports navigation to next slide in overview mode', function() {
+          deck.slide(0);
           openOverview(true);
           deck.next();
-          pressKey(key);
-          expect(deck.parent.classList).not.toContain('bespoke-overview');
+          expect(deck.slide()).toBe(1);
+          closeOverview(true);
           expect(deck.slide()).toBe(1);
         });
-      });
 
-      ['o', 'enter'].forEach(function(key) {
-        it('does not close overview when ' + key + ' key is pressed when modifier key is down', function() {
+        it('supports navigation to previous slide in overview mode', function() {
+          deck.slide(1);
           openOverview(true);
-          pressKey(key, document, { shiftKey: true });
-          expect(deck.parent.classList).toContain('bespoke-overview');
-        });
-      });
-
-      it('closes overview when slide is clicked and activates selected slide', function() {
-        openOverview(true);
-        expect(getComputedStyle(deck.slides[2]).cursor).toBe('pointer');
-        clickElement(deck.slides[2]);
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
-        expect(deck.slide()).toBe(2);
-      });
-    });
-
-    describe('layout and appearance', function() {
-      beforeEach(resetDeck);
-
-      it('makes all slides visible in overview mode', function() {
-        deck.slides.forEach(function(slide) {
-          var computedStyle = getComputedStyle(slide);
-          expect(computedStyle.opacity).toBe(slide.classList.contains('bespoke-active') ? '1' : '0');
-        });
-        openOverview(true);
-        deck.slides.forEach(function(slide) {
-          var computedStyle = getComputedStyle(slide);
-          expect(computedStyle.opacity).toBe('1');
-          expect(computedStyle.visibility).toBe('visible');
-        });
-      });
-
-      it('arranges slides on a grid', function() {
-        var slideBounds = getSlideBounds(deck);
-        for (var i = 1; i <= 5; i++) {
-          expect(slideBounds[i].top).toBe(slideBounds[0].top);
-        }
-        openOverview(true);
-        slideBounds = getSlideBounds(deck);
-        expect(slideBounds[1].top).toBe(slideBounds[0].top);
-        expect(slideBounds[2].top).toBe(slideBounds[0].top);
-        expect(slideBounds[3].top).not.toBe(slideBounds[0].top);
-        expect(slideBounds[4].top).toBe(slideBounds[3].top);
-        expect(slideBounds[5].top).toBe(slideBounds[3].top);
-        closeOverview(true);
-        slideBounds = getSlideBounds(deck);
-        for (var i = 1; i <= 5; i++) {
-          expect(slideBounds[i].top).toBe(slideBounds[0].top);
-        }
-      });
-
-      it('should return slide to original position after closing overview', function() {
-        var before = deck.slides[0].getBoundingClientRect();
-        openOverview(true);
-        closeOverview(true);
-        var after = deck.slides[0].getBoundingClientRect();
-        expect(before.left).toBe(after.left);
-        expect(before.top).toBe(after.top);
-      });
-
-      it('enables scrollbar on deck parent when overview is active', function() {
-        openOverview(true);
-        expect(deck.parent.style.overflowY).toEqual('scroll');
-        closeOverview(true);
-        expect(deck.parent.style.overflowY).toEqual('');
-      });
-
-      it('accounts for scrollbar width when calculating position of slides in overview', function() {
-        resizeDeck(deck.parent, 960, 540);
-        openOverview(true);
-        var leftMostSlideRect = deck.slides[0].getBoundingClientRect(),
-          rightMostSlideRect = deck.slides[2].getBoundingClientRect(),
-          deckWidth = deck.parent.clientWidth,
-          baseZoom = deck.slides[0].style.zoom;
-        resizeDeck(deck.parent, 640, 360);
-        if ('webkitAppearance' in deck.parent.style) {
-          expect(leftMostSlideRect.left).toBeCloseTo(leftMostSlideRect.top, 4); // within 0.00005
-          if (!baseZoom || !(baseZoom = parseFloat(baseZoom))) {
-            baseZoom = 1;
-          }
-          expect(deckWidth / baseZoom - rightMostSlideRect.right).toBeCloseTo(leftMostSlideRect.left, 4); // within 0.00005
-        }
-        else {
-          // NOTE values are much less accurate in Firefox (or so it seems)
-          expect(leftMostSlideRect.left).toBeCloseTo(leftMostSlideRect.top, 0); // within 0.5
-          expect(deckWidth - rightMostSlideRect.right).toBeCloseTo(leftMostSlideRect.left, 0); // within 0.5
-        }
-      });
-
-      it('adds outline around active slide in overview', function() {
-        deck.slides.forEach(function(slide) {
-          expect(getComputedStyle(slide).outlineStyle).toBe('none');
-        });
-        openOverview(true);
-        deck.slides.forEach(function(slide) {
-          if (slide.classList.contains('bespoke-active')) {
-            expect(getComputedStyle(slide).outlineStyle).toBe('solid');
-          }
-          else {
-            expect(getComputedStyle(slide).outlineStyle).toBe('none');
-          }
-        });
-        closeOverview(true);
-        deck.slides.forEach(function(slide) {
-          expect(getComputedStyle(slide).outlineStyle).toBe('none');
-        });
-      });
-
-      ['first', 'last'].forEach(function(position) {
-        it('recalculates grid layout on window resize when ' + position + ' slide is selected', function() {
-          if (position === 'last') {
-            deck.slide(lastSlideIndex);
-          }
-          openOverview(true);
-          var firstSlide = deck.slides[0],
-            slideWidth = firstSlide.getBoundingClientRect().width;
-          resizeDeck(deck.parent, 320, 180);
-          expect(deck.parent.classList).toContain('bespoke-overview');
-          var resizedSlideWidth = firstSlide.getBoundingClientRect().width;
-          // TODO add deck size to resetDeck
-          resizeDeck(deck.parent, 640, 360);
+          deck.prev();
+          expect(deck.slide()).toBe(0);
           closeOverview(true);
-          if ('webkitAppearance' in firstSlide.style) {
-            // NOTE calculation depends on scaling method, so for now just verify it changes
-            expect(resizedSlideWidth).not.toBe(slideWidth);
-          }
-          else {
-            expect(slideWidth / resizedSlideWidth).toBeCloseTo(2, 1);
-          }
+          expect(deck.slide()).toBe(0);
         });
-      });
-    });
 
-    describe('navigation', function() {
-      beforeEach(resetDeck);
+        it('ignores navigation from last slide to next slide in overview mode', function() {
+          deck.slide(lastSlideIndex);
+          openOverview(true);
+          deck.next();
+          expect(deck.slide()).toBe(lastSlideIndex);
+          closeOverview(true);
+          expect(deck.slide()).toBe(lastSlideIndex);
+        });
 
-      it('supports navigation to next slide in overview mode', function() {
-        deck.slide(0);
-        openOverview(true);
-        deck.next();
-        expect(deck.slide()).toBe(1);
-        closeOverview(true);
-        expect(deck.slide()).toBe(1);
-      });
+        it('ignores navigation from first slide to previous slide in overview mode', function() {
+          deck.slide(0);
+          openOverview(true);
+          deck.prev();
+          expect(deck.slide()).toBe(0);
+          closeOverview(true);
+          expect(deck.slide()).toBe(0);
+        });
 
-      it('supports navigation to previous slide in overview mode', function() {
-        deck.slide(1);
-        openOverview(true);
-        deck.prev();
-        expect(deck.slide()).toBe(0);
-        closeOverview(true);
-        expect(deck.slide()).toBe(0);
-      });
+        it('supports navigation to arbitrary slide in overview mode', function() {
+          deck.slide(1);
+          openOverview(true);
+          deck.slide(2);
+          closeOverview(true);
+          expect(deck.slide()).toBe(2);
+        });
 
-      it('ignores navigation from last slide to next slide in overview mode', function() {
-        deck.slide(lastSlideIndex);
-        openOverview(true);
-        deck.next();
-        expect(deck.slide()).toBe(lastSlideIndex);
-        closeOverview(true);
-        expect(deck.slide()).toBe(lastSlideIndex);
-      });
+        it('supports navigation to next row in overview mode', function() {
+          deck.slide(0);
+          openOverview(true);
+          pressKey('down');
+          expect(deck.slide()).toBe(3);
+          closeOverview(true);
+          expect(deck.slide()).toBe(3);
+        });
 
-      it('ignores navigation from first slide to previous slide in overview mode', function() {
-        deck.slide(0);
-        openOverview(true);
-        deck.prev();
-        expect(deck.slide()).toBe(0);
-        closeOverview(true);
-        expect(deck.slide()).toBe(0);
-      });
+        it('supports navigation to previous row in overview mode', function() {
+          deck.slide(3);
+          openOverview(true);
+          pressKey('up');
+          expect(deck.slide()).toBe(0);
+          closeOverview(true);
+          expect(deck.slide()).toBe(0);
+        });
 
-      it('supports navigation to arbitrary slide in overview mode', function() {
-        deck.slide(1);
-        openOverview(true);
-        deck.slide(2);
-        closeOverview(true);
-        expect(deck.slide()).toBe(2);
-      });
-
-      it('supports navigation to next row in overview mode', function() {
-        deck.slide(0);
-        openOverview(true);
-        pressKey('down');
-        expect(deck.slide()).toBe(3);
-        closeOverview(true);
-        expect(deck.slide()).toBe(3);
-      });
-
-      it('supports navigation to previous row in overview mode', function() {
-        deck.slide(3);
-        openOverview(true);
-        pressKey('up');
-        expect(deck.slide()).toBe(0);
-        closeOverview(true);
-        expect(deck.slide()).toBe(0);
-      });
-
-      it('observers do not interfere with navigation if overview is not active', function() {
-        expect(deck.parent.classList).not.toContain('bespoke-overview');
-        expect(deck.slide()).toBe(0);
-        deck.next();
-        expect(deck.slide()).toBe(1);
-        deck.prev();
-        expect(deck.slide()).toBe(0);
-        pressKey('enter');
-        pressKey('down');
-        pressKey('up');
-        expect(deck.slide()).toBe(0);
+        it('observers do not interfere with navigation if overview is not active', function() {
+          expect(deck.parent.classList).not.toContain('bespoke-overview');
+          expect(deck.slide()).toBe(0);
+          deck.next();
+          expect(deck.slide()).toBe(1);
+          deck.prev();
+          expect(deck.slide()).toBe(0);
+          pressKey('enter');
+          pressKey('down');
+          pressKey('up');
+          expect(deck.slide()).toBe(0);
+        });
       });
     });
   });
 
   describe('with custom options', function() {
     describe('columns option', function() {
-      beforeEach(createDeck.bind(null, { columns: 4 }));
+      beforeEach(function() { createDeck(true, { columns: 4 }); });
 
       it('uses the number of columns specified by the columns option', function() {
         slideBounds = getSlideBounds(deck);
@@ -390,8 +401,28 @@ describe('bespoke-overview', function() {
       });
     });
 
+    describe('margin option', function() {
+      beforeEach(function() { createDeck(true, { margin: 0 }); });
+
+      it('adds space between slides equal to the value specified by the margin option', function() {
+        openOverview(true);
+        slideBounds = getSlideBounds(deck);
+        if (isWebKit) {
+          expect(slideBounds[0].left).toBeCloseTo(0, 4); // within 0.00005
+          expect(slideBounds[0].right).toBeCloseTo(slideBounds[1].left, 4);
+          expect(slideBounds[0].bottom).toBeCloseTo(slideBounds[3].top, 4);
+        }
+        else {
+          // NOTE values are much less accurate in Firefox (or so it seems)
+          expect(slideBounds[0].left).toBeCloseTo(0, 0); // within 0.5
+          expect(slideBounds[0].right).toBeCloseTo(slideBounds[1].left, 0);
+          expect(slideBounds[0].bottom).toBeCloseTo(slideBounds[3].top, 0);
+        }
+      });
+    });
+
     describe('autostart option', function() {
-      beforeEach(createDeck.bind(null, { autostart: true }));
+      beforeEach(function() { createDeck(true, { autostart: true }); });
 
       it('starts in overview mode when the autostart option is true', function(done) {
         setTimeout(function() {
@@ -403,7 +434,7 @@ describe('bespoke-overview', function() {
     });
 
     describe('counter option', function() {
-      beforeEach(createDeck.bind(null, { counter: true }));
+      beforeEach(function() { createDeck(true, { counter: true }); });
 
       it('adds bespoke-overview-counter class to parent when counter option is enabled', function() {
         openOverview(true);
@@ -414,7 +445,7 @@ describe('bespoke-overview', function() {
     });
 
     describe('title option', function() {
-      beforeEach(createDeck.bind(null, { title: true }));
+      beforeEach(function() { createDeck(true, { title: true }); });
 
       it('inserts title above overview if title option is enabled', function() {
         openOverview(true);
