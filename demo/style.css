@@ -47,6 +47,15 @@ p {
   bottom: 0;
 }
 
+/* NOTE prevents slides from shifting in Firefox when scrollbar is toggled and scale plugin is in use */
+/*
+@supports(-moz-appearance: none) {
+  .bespoke-scale-parent {
+    width: 100vw;
+  }
+}
+*/
+
 .bespoke-parent {
   /* IMPORTANT only put overflow on parent, not other slide wrapper elements */
   overflow: hidden;
