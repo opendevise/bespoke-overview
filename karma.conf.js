@@ -35,21 +35,27 @@ module.exports = function(config) {
     autoWatch: false,
 
     customLaunchers: { 
+      PhantomJS_custom: {
+        base: 'PhantomJS',
+        options: {
+          // NOTE transition events don't always fire if viewportSize is not set
+          viewportSize: { width: 1280, height: 720 }
+        },
+      },
       PhantomJS_debug: {
         base: 'PhantomJS',
         options: {
+          // NOTE transition events don't always fire if viewportSize is not set
           viewportSize: { width: 1280, height: 720 }
         },
         debug: true
       }
     },
 
-    //browserNoActivityTimeout: 60000,
-
-    browsers: ['PhantomJS']
+    browsers: ['PhantomJS_custom']
     //browsers: ['PhantomJS_debug']
     //browsers: ['Firefox']
     //browsers: ['Chrome']
-    //browsers: ['PhantomJS', 'Firefox']
+    //browsers: ['PhantomJS_custom', 'Firefox', 'Chrome']
   });
 };
