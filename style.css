@@ -42,18 +42,23 @@ p {
   position: absolute;
   top: 0;
   left: 0;
+  /* NOTE could use width: 100vw instead of right: 0, though doesn't have same effect in all browsers */
   right: 0;
   bottom: 0;
 }
 
+/* NOTE another way to prevent slides from shifting in Firefox when scrollbar is toggled (only when using scale plugin) */
+/*
+@supports(-moz-appearance: none) {
+  .bespoke-scale-parent {
+    width: 100vw;
+  }
+}
+*/
+
 .bespoke-parent {
   /* IMPORTANT only put overflow on parent, not other slide wrapper elements */
   overflow: hidden;
-}
-
-.bespoke-scale-parent {
-  /* set width to 100vw to fix scrollbar calculation in Firefox */
-  width: 100vw;
 }
 
 .bespoke-parent > :not(.bespoke-slide),
@@ -99,6 +104,17 @@ p {
   opacity: 1;
   /* WebKit sometimes requires z-index when using transform-based scaling, though it has no affect on stacking order */
   z-index: 1;
+}
+
+/* Don't show a visible scrollbar in WebKit */
+.bespoke-overview::-webkit-scrollbar {
+  width: 0;
+}
+
+/* Don't show a visible scrollbar in IE 10+ */
+/* Use `none` for hide scrollbar or `-ms-autohiding-scrollbar` to make it an overlay */
+.bespoke-overview {
+  -ms-overflow-style: none;
 }
 
 /* The following declaration disables transitions when navigating in overview and when moving to and from overview */
