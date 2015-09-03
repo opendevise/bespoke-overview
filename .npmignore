@@ -1,2 +1,7 @@
+/.gitattributes
+/.travis.yml
+/WORKLOG.adoc
+/package-README.md
+/_attic/
 /demo/
 /test/coverage/
