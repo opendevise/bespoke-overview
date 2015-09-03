@@ -202,6 +202,15 @@ describe('bespoke-overview', function() {
         }
       });
 
+      it('should return slide to original position after closing overview', function() {
+        var before = deck.slides[0].getBoundingClientRect();
+        openOverview(true);
+        closeOverview(true);
+        var after = deck.slides[0].getBoundingClientRect();
+        expect(before.left).toBe(after.left);
+        expect(before.top).toBe(after.top);
+      });
+
       it('enables scrollbar on deck parent when overview is active', function() {
         openOverview(true);
         expect(deck.parent.style.overflowY).toEqual('scroll');
@@ -465,6 +474,20 @@ describe('bespoke-overview', function() {
       expect(deck.slide()).toBe(0); 
       deck.next();
       expect(deck.slide()).toBe(1);
+    });
+
+    it('should return slide to original position after closing overview', function(done) {
+      var before = deck.slides[0].getBoundingClientRect();
+      openOverview(true);
+      setTimeout(function() {
+        closeOverview(true);
+        setTimeout(function() {
+          var after = deck.slides[0].getBoundingClientRect();
+          expect(before.left).toBe(after.left);
+          expect(before.top).toBe(after.top);
+          done();
+        }, 200);
+      }, 200);
     });
 
     it('removes stale transition when opening overview', function(done) {
