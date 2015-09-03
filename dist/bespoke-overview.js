@@ -95,7 +95,7 @@ module.exports = function(opts) {
         var h1 = document.createElement('h1');
         h1.appendChild(document.createTextNode(parent.getAttribute('data-title') || document.title));
         header.appendChild(h1);
-        parent.insertBefore(header, first).offsetHeight; // jshint ignore:line
+        flushStyle(parent.insertBefore(header, first));
         return header;
       },
       openOverview = function() {
