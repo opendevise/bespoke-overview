@@ -39,7 +39,19 @@ Press the kbd:[o] key to activate overview mode.
 
 == Download
 
-Download the {uri-raw-file-base}/dist/bespoke-overview.min.js[production mode version] or the {uri-raw-file-base}/dist/bespoke-overview.js[development mode version], or use a <<package-managers,package manager>>.
+Download the {uri-raw-file-base}/dist/bespoke-overview.min.js[production mode version] or the {uri-raw-file-base}/dist/bespoke-overview.js[development mode version], or use a package manager:
+
+=== npm
+
+```bash
+$ npm install bespoke-overview
+```
+
+=== Bower
+
+```bash
+$ bower install bespoke-overview
+```
 
 == Usage
 
@@ -294,20 +306,6 @@ If you enable the title, you can also use the `bespoke-overview-to` and `bespoke
 ```
 
 IMPORTANT: The `visibility` property is important as it overrides the built-in behavior necessary to work when transitions on the title are not used.
-
-== Package managers
-
-=== npm
-
-```bash
-$ npm install bespoke-overview
-```
-
-=== Bower
-
-```bash
-$ bower install bespoke-overview
-```
 
 == Credits
 
