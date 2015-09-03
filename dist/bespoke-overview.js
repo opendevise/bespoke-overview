@@ -12,7 +12,7 @@ module.exports = function(opts) {
   return function(deck) {
     opts = (typeof opts === 'object' ? opts : {});
     var KEYCODE = { o: 79, enter: 13, up: 38, down: 40 },
-      RE = { csv: /, */, none: /^none(?:, *none)*$/, transform: /^translate\((-?[\d.]+)px, *(-?[\d.]+)px\) scale\(([\d.]+)\)$/ },
+      RE = { csv: /, */, none: /^none(?:, ?none)*$/, transform: /^translate\((.+?)px, ?(.+?)px\) scale\((.+?)\)$/ },
       TRANSITIONEND = (!('transition' in document.body.style) && ('webkitTransition' in document.body.style) ? 'webkitTransitionEnd' : 'transitionend'),
       VENDOR = ['webkit', 'Moz', 'ms'],
       columns = (typeof opts.columns === 'number' ? parseInt(opts.columns) : 3),
@@ -29,8 +29,8 @@ module.exports = function(opts) {
         }
         return name;
       },
-      getTransformScaleFactor = function(element) {
-        return element.getBoundingClientRect().width / element.offsetWidth;
+      getTransformScaleFactor = function(element, transformProp) {
+        return parseFloat(element.style[transformProp].slice(6, -1));
       },
       getZoomFactor = function(element) {
         if ('zoom' in element.style) return parseFloat(element.style.zoom) || undefined;
@@ -49,8 +49,7 @@ module.exports = function(opts) {
         });
         return result;
       },
-      // NOTE forces browser to apply style changes immediately, hence forcing a reflow
-      forceReflow = function(element, property, from, to) {
+      flushStyle = function(element, property, from, to) {
         if (property) element.style[property] = from;
         element.offsetHeight; // jshint ignore: line
         if (property) element.style[property] = to;
@@ -61,7 +60,7 @@ module.exports = function(opts) {
       onNavigate = function(offset, e) {
         if (overviewActive) {
           var targetIndex = e.index + offset;
-          // IMPORTANT must navigate using deck.slide to step over bullets
+          // IMPORTANT must use deck.slide to navigate in order to bypass bullets
           if (targetIndex > -1 && targetIndex < deck.slides.length) deck.slide(targetIndex, { preview: true });
           return false;
         }
@@ -76,18 +75,7 @@ module.exports = function(opts) {
         if (overviewActive && e.scrollIntoView !== false) scrollSlideIntoView(e.slide, e.index, getZoomFactor(e.slide));
       },
       scrollSlideIntoView = function(slide, index, zoomFactor) {
-        deck.parent.scrollTop = (index < columns ? 0 :
-            deck.parent.scrollTop + slide.getBoundingClientRect().top * (zoomFactor || 1));
-        //if (index < columns) {
-        //  deck.parent.scrollTop = 0;
-        //}
-        //else {
-        //  var slideRect = slide.getBoundingClientRect(), overflow;
-        //  if ((overflow = slideRect.top * (zoomFactor || 1)) < 0 ||
-        //      (overflow = slideRect.bottom * (zoomFactor || 1) - deck.parent.offsetHeight) > 0) {
-        //    deck.parent.scrollTop += overflow;
-        //  }
-        //}
+        deck.parent.scrollTop = (index < columns ? 0 : deck.parent.scrollTop + slide.getBoundingClientRect().top * (zoomFactor || 1));
       },
       removeAfterTransition = function(direction, parentClasses, slide, slideAlt) {
         slide.removeEventListener(TRANSITIONEND, afterTransition, false);
@@ -117,15 +105,16 @@ module.exports = function(opts) {
           lastSlideIndex = slides.length - 1,
           activeSlideIndex = deck.slide(),
           sampleSlide = (activeSlideIndex > 0 ? slides[0] : slides[lastSlideIndex]),
-          transformName = getStyleProperty(sampleSlide, 'transform'),
+          transformProp = getStyleProperty(sampleSlide, 'transform'),
           scaleParent = parent.querySelector('.bespoke-scale-parent'),
-          title,
           baseScale = 1,
           zoomFactor,
+          title,
           numTransitions = 0,
-          initial = !overviewActive;
+          initial = !overviewActive,
+          isWebKit = 'webkitAppearance' in parent.style;
         if (scaleParent) {
-          baseScale = getTransformScaleFactor(scaleParent);
+          baseScale = getTransformScaleFactor(scaleParent, transformProp);
         }
         else if ((zoomFactor = getZoomFactor(sampleSlide))) {
           baseScale = zoomFactor;
@@ -142,6 +131,7 @@ module.exports = function(opts) {
               (getTransitionProperties(sampleSlide).indexOf('transform') >= 0 ? 1 : 0));
           parent.style.overflowY = 'scroll'; // gives us fine-grained control
           parent.style.scrollBehavior = 'smooth'; // not supported by all browsers
+          if (isWebKit) slides.forEach(function(slide) { flushStyle(slide, 'marginBottom', '0%', ''); });
         }
         var deckWidth = parent.clientWidth / baseScale,
           deckHeight = parent.clientHeight / baseScale,
@@ -161,7 +151,7 @@ module.exports = function(opts) {
           row = 0, col = 0;
         if (title) {
           if (opts.scaleTitle !== false) {
-            title.style[zoomFactor ? 'zoom' : transformName] = (zoomFactor ? totalScale : 'scale(' + totalScale + ')');
+            title.style[zoomFactor ? 'zoom' : transformProp] = (zoomFactor ? totalScale : 'scale(' + totalScale + ')');
             title.style.width = (parent.clientWidth / totalScale) + 'px';
             scaledTitleHeight = title.offsetHeight * scale;
           }
@@ -173,12 +163,11 @@ module.exports = function(opts) {
         slides.forEach(function(slide) {
           var x = col * scaledSlideWidth + (col + 1) * scaledMargin - scrollbarOffset - slideX,
             y = row * scaledSlideHeight + (row + 1) * scaledMargin + scaledTitleHeight - slideY;
-          if (x.toString().indexOf('e-') !== -1) x = 0; // drop scientific notation for numbers ~0 as it confuses WebKit
-          if (y.toString().indexOf('e-') !== -1) y = 0; // drop scientific notation for numbers ~0 as it confuses WebKit
-          slide.style[transformName] = 'translate(' + x + 'px, ' + y + 'px) scale(' + scale + ')';
-          // NOTE add margin to last slide to leave gap below last row; doesn't work in Firefox
-          // HACK setting marginBottom forces Webkit to reflow content and forces scrollbar to recalculate
-          slide.style.marginBottom = ((row * columns + col) === lastSlideIndex ? margin + 'px' : '0%');
+          // NOTE drop scientific notation for numbers near 0 as it confuses WebKit
+          slide.style[transformProp] = 'translate(' + (x.toString().indexOf('e-') >= 0 ? 0 : x) + 'px, ' +
+              (y.toString().indexOf('e-') >= 0 ? 0 : y) + 'px) scale(' + scale + ')';
+          // NOTE add margin to last slide to leave gap below last row; only honored by WebKit
+          if (row * columns + col === lastSlideIndex) slide.style.marginBottom = margin + 'px';
           slide.addEventListener('click', onSlideClick, false);
           if (col === (columns - 1)) {
             row += 1;
@@ -193,16 +182,15 @@ module.exports = function(opts) {
             sampleSlide.addEventListener(TRANSITIONEND, (afterTransition = function(e) {
               if (e.target === this && (numTransitions -= 1) === 0) {
                 removeAfterTransition('to', parentClasses, this);
-                if ('webkitAppearance' in parent.style && parent.scrollHeight > parent.clientHeight) {
-                  // NOTE kick scrollbar when it fails to awaken from zombie state
-                  forceReflow(parent, 'overflowY', 'auto', 'scroll');
+                if (isWebKit && parent.scrollHeight > parent.clientHeight) {
+                  flushStyle(parent, 'overflowY', 'auto', 'scroll'); // awakens scrollbar from zombie state
                 }
                 scrollSlideIntoView(slides[activeSlideIndex], activeSlideIndex, zoomFactor);
               }
             }), false);
           }
           else {
-            slides.forEach(function(slide) { forceReflow(slide); });
+            slides.forEach(function(slide) { flushStyle(slide); }); // bypass transition, if any
             parentClasses.remove('bespoke-overview-to');
             scrollSlideIntoView(slides[activeSlideIndex], activeSlideIndex, zoomFactor);
           }
@@ -213,48 +201,38 @@ module.exports = function(opts) {
       },
       // NOTE the order of operation in this method is critical; heavily impacts behavior & transition smoothness
       closeOverview = function(selection) {
-        // IMPORTANT we intentionally reselect active slide to activate behavior
+        // IMPORTANT intentionally reselect active slide to reactivate behavior
         deck.slide(typeof selection === 'number' ? selection : deck.slide(), { scrollIntoView: false });
         var slides = deck.slides,
           parent = deck.parent,
           parentClasses = parent.classList,
           lastSlideIndex = slides.length - 1,
           sampleSlide = (deck.slide() > 0 ? slides[0] : slides[lastSlideIndex]),
-          transformName = getStyleProperty(sampleSlide, 'transform'),
-          transitionName = getStyleProperty(sampleSlide, 'transition'),
+          transformProp = getStyleProperty(sampleSlide, 'transform'),
+          transitionProp = getStyleProperty(sampleSlide, 'transition'),
           scaleParent = parent.querySelector('.bespoke-scale-parent'),
-          baseScale;
+          baseScale,
+          isWebKit = 'webkitAppearance' in parent.style;
         if (scaleParent) {
-          baseScale = getTransformScaleFactor(scaleParent);
+          baseScale = getTransformScaleFactor(scaleParent, transformProp);
         }
         else if (!(baseScale = getZoomFactor(sampleSlide))) {
           baseScale = 1;
         }
         if (afterTransition) removeAfterTransition('to', parentClasses, slides[0], slides[lastSlideIndex]);
-        var yShift = parent.scrollTop / baseScale;
-        // NOTE xShift compensates for horizontal shift when the scrollbar is removed in Webkit
-        var xShift = 'webkitAppearance' in parent.style ? 0 : undefined;
-        parent.style.scrollBehavior = '';
-        parent.style.overflowY = '';
+        var yShift = parent.scrollTop / baseScale,
+          // xShift accounts for horizontal shift when scrollbar is removed
+          xShift = (parent.offsetWidth - (scaleParent || parent).clientWidth) / 2 / baseScale;
+        parent.style.scrollBehavior = parent.style.overflowY = '';
         slides.forEach(function(slide) {
-          // CAUTION getBoundingClientRect() API sometimes gives false 0 delta, so keep looking for non-zero value
-          if (xShift === 0) {
-            var left = slide.getBoundingClientRect().left;
-            // NOTE clearing marginBottom value previously assigned forces reflow in Webkit
-            slide.style.marginBottom = ''; 
-            xShift = slide.getBoundingClientRect().left - left;
-          }
-          else {
-            slide.style.marginBottom = '';
-          }
+          if (isWebKit) flushStyle(slide, 'marginBottom', '0%', '');
           slide.removeEventListener('click', onSlideClick, false);
         });
         if (yShift || xShift) {
           slides.forEach(function(slide) {
-            var m = slide.style[transformName].match(RE.transform);
-            if (!m) return;
-            slide.style[transformName] = 'translate(' + (parseFloat(m[1]) - (xShift || 0)) + 'px, ' + (parseFloat(m[2]) - yShift) + 'px) scale(' + m[3] + ')';
-            forceReflow(slide, transitionName, 'none', '');
+            var m = slide.style[transformProp].match(RE.transform);
+            slide.style[transformProp] = 'translate(' + (parseFloat(m[1]) - (xShift || 0)) + 'px, ' + (parseFloat(m[2]) - yShift) + 'px) scale(' + m[3] + ')';
+            flushStyle(slide, transitionProp, 'none', ''); // bypass transition, if any
           });
         }
         parent.scrollTop = 0;
@@ -264,14 +242,14 @@ module.exports = function(opts) {
         parentClasses.add('bespoke-overview-from');
         var numTransitions = (lastSlideIndex > 0 ? getTransitionProperties(sampleSlide).length :
             (getTransitionProperties(sampleSlide).indexOf('transform') >= 0 ? 1 : 0));
-        slides.forEach(function(slide) { slide.style[transformName] = ''; });
+        slides.forEach(function(slide) { slide.style[transformProp] = ''; });
         if (numTransitions > 0) {
           sampleSlide.addEventListener(TRANSITIONEND, (afterTransition = function(e) {
             if (e.target === this && (numTransitions -= 1) === 0) removeAfterTransition('from', parentClasses, this);
           }), false);
         }
         else {
-          slides.forEach(function(slide) { forceReflow(slide); });
+          slides.forEach(function(slide) { flushStyle(slide); }); // bypass transition, if any
           parentClasses.remove('bespoke-overview-from');
         }
       },
