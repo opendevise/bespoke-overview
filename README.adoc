@@ -5,8 +5,10 @@ Dan Allen <https://github.com/mojavelinux>
 :idseparator: -
 :experimental:
 ifdef::env-github[:badges:]
+// Variables:
+:release-version: v1.0.0
 // URIs:
-:uri-raw-file-base: https://raw.githubusercontent.com/opendevise/bespoke-overview/master
+:uri-raw-file-base: https://raw.githubusercontent.com/opendevise/bespoke-overview/{release-version}
 
 ifdef::badges[]
 image:https://img.shields.io/npm/v/bespoke-overview.svg[npm package, link=https://www.npmjs.com/package/bespoke-overview]
