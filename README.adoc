@@ -1,5 +1,6 @@
 = bespoke-overview
 Dan Allen <https://github.com/mojavelinux>
+v1.0.0
 // Settings:
 :idprefix:
 :idseparator: -
@@ -9,11 +10,11 @@ ifdef::env-github[:badges:]
 :uri-raw-file-base: https://raw.githubusercontent.com/opendevise/bespoke-overview/master
 
 ifdef::badges[]
-//image:https://img.shields.io/npm/v/bespoke-overview.svg[npm package, link=https://www.npmjs.com/package/bespoke-overview]
+image:https://img.shields.io/npm/v/bespoke-overview.svg[npm package, link=https://www.npmjs.com/package/bespoke-overview]
 image:https://img.shields.io/travis/opendevise/bespoke-overview/master.svg[Build Status (Travis CI), link=https://travis-ci.org/opendevise/bespoke-overview]
 endif::[]
 
-This plugin adds an overview mode to your http://markdalgleish.com/projects/bespoke.js[Bespoke.js] presentation, which turns all the slides visible and arranges them on a grid when the kbd:[o] key is pressed.
+This plugin adds an overview mode to your http://markdalgleish.com/projects/bespoke.js[Bespoke.js] presentation, which makes all the slides visible and arranges them on a grid when the kbd:[o] key is pressed.
 This mode gives you a “big picture” view of your presentation.
 You can also use it as a navigation aid to jump to an arbitrary slide.
 
@@ -27,8 +28,8 @@ Download the {uri-raw-file-base}/dist/bespoke-overview.min.js[production mode ve
 
 http://opendevise.github.io/bespoke-overview[View the demo] online.
 
-This repository includes a demo folder the shows this plugin in action.
-To view it locally, you first need to clone this repository:
+This repository includes a demo that shows this plugin in action.
+To view the demo locally, you first need to clone this repository:
 
  $ git clone https://github.com/opendevise/bespoke-overview && cd bespoke-overview
 
@@ -41,7 +42,7 @@ Press the kbd:[o] key to activate overview mode.
 
 == Usage
 
-This plugin is shipped in a https://github.com/umdjs/umd[UMD format], meaning that it is available as a CommonJS/AMD module or as a browser global.
+This plugin is shipped in a https://github.com/umdjs/umd[UMD format], meaning it is available as a CommonJS/AMD module or as a browser global.
 
 For example, when using CommonJS modules:
 
@@ -76,11 +77,11 @@ This configuration ensures that both the scale and overview plugins work in Inte
 When using CommonJS modules:
 
 ```js
-var html = document.documentElement;
+var isWebKit = 'webkitAppearance' in document.documentElement.style;
 
 bespoke.from('.deck', [
   // ...
-  scale('webkitAppearance' in html.style ? 'zoom' : 'transform'),
+  scale(isWebKit ? 'zoom' : 'transform'),
   overview();
 ]);
 ```
@@ -92,11 +93,11 @@ var bespoke = require('bespoke'),
   // ...
   scale = require('bespoke-scale'),
   overview = require('bespoke-overview'),
-  html = document.documentElement;
+  isWebKit = 'webkitAppearance' in document.documentElement.style; 
 
 bespoke.from('.deck', [
   // ...
-  bespoke.plugins.scale('webkitAppearance' in html.style ? 'zoom' : 'transform'),
+  bespoke.plugins.scale(isWebKit ? 'zoom' : 'transform'),
   bespoke.plugins.overview();
 ]);
 ```
@@ -110,7 +111,7 @@ The number of columns to use for the grid.
 
 margin _(type: number, default: 15)_::
 The spacing (in pixels) between the slides in the grid.
-This value is scaled alone with the slides in overview mode.
+This value is scaled by the same amount as the slides in overview mode.
 
 autostart _(type: boolean, default: false)_::
 A flag that controls whether the presentation starts in overview mode.
@@ -122,16 +123,19 @@ The style of the numbers can be controlled using the `.bespoke-overview-counter 
 
 title _(type: boolean, default: false)_::
 A flag that controls whether the presentation title is shown above the slides in overview mode.
-When enabled, adds a `<header class="bespoke-title">` element as the first child of the deck parent element containing the title wrapped in a child `<h1>` element.
++
+When enabled, a `<header class="bespoke-title">` element gets added as the first child of the deck parent element.
+The presentation title is enclosed in a `<h1>` element inside the `<header>` element.
 The title text is taken from either the `data-title` attribute on the deck parent or `document.title`.
-The style of the title can be controlled using the `.bespoke-overview .bespoke-title` CSS selector.
++
+The style of the `<header>` and `<h1>` elements can be controlled using the `.bespoke-overview .bespoke-title` and `.bespoke-overview .bespoke-title h1` CSS selectors, respectively.
 
 scaleTitle _(type: boolean, default: true)_::
 A flag that controls whether the title element is scaled proportionally to the scaling of the slides.
 
 ==== Options example
 
-Here's an example showing many of the options in use:
+Here's an example showing most of the options in use:
 
 ```
 bespoke.from('.deck', [
@@ -150,22 +154,22 @@ The overview plugin should be applied in the following order relative to other p
 * *bespoke-overview*
 * bespoke-bullets
 
-The placement of other plugins doesn't result in any known problems.
+The placement of other plugins doesn't cause any known problems.
 
 == How it works
 
-When the trigger key is pressed (i.e., kbd:[o]), all the slides in the presentation become visible and are arranged in a grid.
+When the trigger key is pressed (i.e., kbd:[o]), all the slides in the presentation become visible and are arranged on a grid.
 The number of columns in the grid is controlled by the `columns` option passed to the plugin (e.g., `overview({ columns: 4 })`, which defaults to 3.
 The number of rows is determined by the number of slides in the presentation.
 The browser's scrollbar will appear on the right side of the screen in overview mode, which can be used to bring slides into view that spill outside the visible area.
 
-When the plugin is loaded, it prepends a collection of styles to the top of the HTML page, which are used to control the default behavior of the overview mode.
+When the plugin is loaded, it prepends a collection of built-in styles to the top of the HTML page, which are used to control the default behavior of the overview mode.
 These styles can be overridden or customized.
 
 When the overview is activated, the `bespoke-overview` class is added to the deck parent element (the element that has the `bespoke-parent` class).
 Thanks to the built-in styles, all the slides will become visible (pending any slide transitions) when the `bespoke-overview` class is added to the deck parent.
 Next, a transform is applied to each slide to arrange the slides in a grid layout.
-The transform consists of two properties:
+The transform consists of the following two properties:
 
 translate::
 sets the x, y coordinates of the slide
@@ -173,7 +177,7 @@ sets the x, y coordinates of the slide
 scale::
 resizes the slide to fit within the grid
 
-TIP: This plugin works either with or without the bespoke-scale plugin applied (in either mode).
+TIP: This plugin works both with and without the bespoke-scale plugin enabled (using either scale method).
 
 After the overview is activated, the selected slide will automatically be scrolled into view.
 A border will appear around the selected slide.
