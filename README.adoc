@@ -71,7 +71,7 @@ bespoke.from('.deck', [
 === Scaling
 
 If you're using the https://github.com/markdalgleish/bespoke-scale[bespoke-scale] plugin, you _must_ specify the scaling method explicitly to ensure zoom-based scaling is only used for browsers that use WebKit.
-This configuration ensures that both the scale and overview plugins work in Internet Explorer 10 and above (as well as Opera/Presto). _IE 9 and below are not supported by Bespoke.js._
+This configuration ensures that both the scale and overview plugins work in Internet Explorer 10 and above (IE 10+) (as well as Opera/Presto). _IE 9 and below are not supported by Bespoke.js._
 
 When using CommonJS modules:
 
@@ -211,6 +211,23 @@ If each slide is enclosed in a wrapper element that has a transform applied to i
 This happens because a wrapper element with a transform applied creates a new stacking context, which limits the scope of the z-index setting (i.e., the value only applies relative to other elements in the stacking context).
 Under these conditions, the active slide may not appear on top when transitioning out of overview mode regardless of the z-index setting.
 ****
+
+.Hiding the scrollbar
+[TIP]
+====
+To make the transitions faster and smoother in WebKit and IE 10+, you can disable the visibility of the scrollbar.
+To do so, add the following style rules to your CSS:
+
+```css
+.bespoke-overview::-webkit-scrollbar {
+  width: 0;
+}
+
+.bespoke-overview {
+  -ms-overflow-style: none; /* or -ms-autohiding-scrollbar */
+}
+```
+====
 
 === Default transitions
 
