@@ -19,10 +19,6 @@ You can also use it as a navigation aid to jump to an arbitrary slide.
 
 image::demo/screenshot.png[Screenshot of bespoke-overview]
 
-== Download
-
-Download the {uri-raw-file-base}/dist/bespoke-overview.min.js[production mode version] or the {uri-raw-file-base}/dist/bespoke-overview.js[development mode version], or use a <<package-managers,package manager>>.
-
 == Example
 
 http://opendevise.github.io/bespoke-overview[View the demo] online.
@@ -38,6 +34,10 @@ Next, install the dependencies inside the project folder using npm:
 
 Finally, visit the file [path]_demo/index.html_ in your browser to see the plugin in action.
 Press the kbd:[o] key to activate overview mode.
+
+== Download
+
+Download the {uri-raw-file-base}/dist/bespoke-overview.min.js[production mode version] or the {uri-raw-file-base}/dist/bespoke-overview.js[development mode version], or use a <<package-managers,package manager>>.
 
 == Usage
 
