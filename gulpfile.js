@@ -42,7 +42,6 @@ gulp.task('test', function(done) {
 gulp.task('compile', ['clean'], function() {
   return browserify({ standalone: 'bespoke.plugins.overview' })
     .add('./lib/bespoke-overview.js')
-    .transform('brfs')
     .bundle()
     .pipe(source('bespoke-overview.js'))
     .pipe(buffer())

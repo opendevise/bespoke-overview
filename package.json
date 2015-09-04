@@ -9,9 +9,6 @@
     "url": "https://github.com/mojavelinux"
   },
   "main": "./lib/bespoke-overview.js",
-  "browserify": {
-    "transform": [ "brfs" ]
-  },
   "repository": {
     "type": "git",
     "url": "git://github.com/opendevise/bespoke-overview.git"
@@ -28,7 +25,6 @@
     "bespoke-keys": "^1.0.0",
     "bespoke-touch": "^1.0.0",
     "bespoke-scale": "^1.0.0",
-    "brfs": "^1.4.1",
     "browserify": "^11.0.1",
     "del": "^1.2.0",
     "function-bind": "^1.0.2",
