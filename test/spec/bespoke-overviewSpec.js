@@ -66,7 +66,7 @@ describe('bespoke-overview', function() {
     // NOTE insert-css only inserts CSS once, so we shouldn't remove the inserted <style> element
     destroyDeck = function() {
       deck.fire('destroy');
-      document.body.removeChild(deck.parent);
+      deck.parent.parentNode.removeChild(deck.parent);
       deck = null;
     },
     openOverview = function(assertState) {
