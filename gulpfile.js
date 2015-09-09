@@ -88,7 +88,7 @@ gulp.task('compile:demo:js', ['compile'], function() {
       'demo/demo.js'
   ])
   .pipe(concat('build.js'))
-  .pipe(uglify())
+  //.pipe(uglify())
   .pipe(gulp.dest('demo/dist'));
 });
 
