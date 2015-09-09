@@ -1,6 +1,5 @@
 = bespoke-overview
 Dan Allen <https://github.com/mojavelinux>
-v1.0.2
 // Settings:
 :idprefix:
 :idseparator: -
