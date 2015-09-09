@@ -117,7 +117,7 @@ bespoke.from('.deck', [
 
 === Options
 
-The following options are available to the bespoke-plugin:
+The following options are available when registering the bespoke-overview plugin:
 
 columns _(type: integer, default: 3)_::
 The number of columns to use for the grid.
