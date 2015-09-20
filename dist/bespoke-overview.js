@@ -19,13 +19,13 @@ module.exports = function(opts) {
     '.bespoke-overview:not(.bespoke-overview-to) .bespoke-title{visibility:visible}' +
     '.bespoke-overview-to .bespoke-active,.bespoke-overview-from .bespoke-active{z-index:1}', { prepend: true });
   return function(deck) {
-    opts = (typeof opts === 'object' ? opts : {});
-    var KEYCODE = { o: 79, enter: 13, up: 38, down: 40 },
-      RE = { csv: /, */, none: /^none(?:, ?none)*$/, transform: /^translate\((.+?)px, ?(.+?)px\) scale\((.+?)\)$/ },
-      TRANSITIONEND = (!('transition' in document.body.style) && ('webkitTransition' in document.body.style) ? 'webkitTransitionEnd' : 'transitionend'),
+    opts = typeof opts === 'object' ? opts : {};
+    var KEY_O = 79, KEY_ENT = 13, KEY_UP = 38, KEY_DN = 40,
+      RE_CSV = /, */, RE_NONE = /^none(?:, ?none)*$/, RE_TRANSFORM = /^translate\((.+?)px, ?(.+?)px\) scale\((.+?)\)$/,
+      TRANSITIONEND = !('transition' in document.body.style) && ('webkitTransition' in document.body.style) ? 'webkitTransitionEnd' : 'transitionend',
       VENDOR = ['webkit', 'Moz', 'ms'],
-      columns = (typeof opts.columns === 'number' ? parseInt(opts.columns) : 3),
-      margin = (typeof opts.margin === 'number' ? parseFloat(opts.margin) : 15),
+      columns = typeof opts.columns === 'number' ? parseInt(opts.columns) : 3,
+      margin = typeof opts.margin === 'number' ? parseFloat(opts.margin) : 15,
       overviewActive = null,
       afterTransition,
       getStyleProperty = function(element, name) {
@@ -47,11 +47,11 @@ module.exports = function(opts) {
         var result = [],
           style = getComputedStyle(element),
           transitionProperty = style[getStyleProperty(element, 'transitionProperty')];
-        if (!transitionProperty || RE.none.test(transitionProperty)) return result;
+        if (!transitionProperty || RE_NONE.test(transitionProperty)) return result;
         // NOTE beyond this point, assume computed style returns compliant values
-        transitionProperty = transitionProperty.split(RE.csv);
-        var transitionDuration = style[getStyleProperty(element, 'transitionDuration')].split(RE.csv),
-          transitionDelay = style[getStyleProperty(element, 'transitionDelay')].split(RE.csv);
+        transitionProperty = transitionProperty.split(RE_CSV);
+        var transitionDuration = style[getStyleProperty(element, 'transitionDuration')].split(RE_CSV),
+          transitionDelay = style[getStyleProperty(element, 'transitionDelay')].split(RE_CSV);
         transitionProperty.forEach(function(property, i) {
           if (transitionDuration[i] !== '0s' || transitionDelay[i] !== '0s') result.push(property);
         });
@@ -80,7 +80,7 @@ module.exports = function(opts) {
         if (e.scrollIntoView !== false) scrollSlideIntoView(e.slide, e.index, getZoomFactor(e.slide));
       },
       scrollSlideIntoView = function(slide, index, zoomFactor) {
-        deck.parent.scrollTop = (index < columns ? 0 : deck.parent.scrollTop + slide.getBoundingClientRect().top * (zoomFactor || 1));
+        deck.parent.scrollTop = index < columns ? 0 : deck.parent.scrollTop + slide.getBoundingClientRect().top * (zoomFactor || 1);
       },
       removeAfterTransition = function(direction, parentClasses, slide, slideAlt) {
         slide.removeEventListener(TRANSITIONEND, afterTransition, false);
@@ -109,7 +109,7 @@ module.exports = function(opts) {
           parentClasses = parent.classList,
           lastSlideIndex = slides.length - 1,
           activeSlideIndex = deck.slide(),
-          sampleSlide = (activeSlideIndex > 0 ? slides[0] : slides[lastSlideIndex]),
+          sampleSlide = activeSlideIndex > 0 ? slides[0] : slides[lastSlideIndex],
           transformProp = getStyleProperty(sampleSlide, 'transform'),
           scaleParent = parent.querySelector('.bespoke-scale-parent'),
           baseScale = 1,
@@ -133,8 +133,8 @@ module.exports = function(opts) {
           overviewActive = [deck.on('activate', onActivate), deck.on('prev', onNavigate.bind(null, -1)), deck.on('next', onNavigate.bind(null, 1))];
           if (!!opts.counter) parentClasses.add('bespoke-overview-counter');
           parentClasses.add('bespoke-overview-to');
-          numTransitions = (lastSlideIndex > 0 ? getTransitionProperties(sampleSlide).length :
-              (getTransitionProperties(sampleSlide).indexOf('transform') >= 0 ? 1 : 0));
+          numTransitions = lastSlideIndex > 0 ? getTransitionProperties(sampleSlide).length :
+              (getTransitionProperties(sampleSlide).indexOf('transform') >= 0 ? 1 : 0);
           parent.style.overflowY = 'scroll'; // gives us fine-grained control
           parent.style.scrollBehavior = 'smooth'; // not supported by all browsers
           if (isWebKit) slides.forEach(function(slide) { flushStyle(slide, 'marginBottom', '0%', ''); });
@@ -157,7 +157,7 @@ module.exports = function(opts) {
           row = 0, col = 0;
         if (title) {
           if (opts.scaleTitle !== false) {
-            title.style[zoomFactor ? 'zoom' : transformProp] = (zoomFactor ? totalScale : 'scale(' + totalScale + ')');
+            title.style[zoomFactor ? 'zoom' : transformProp] = zoomFactor ? totalScale : 'scale(' + totalScale + ')';
             title.style.width = (parent.clientWidth / totalScale) + 'px';
             scaledTitleHeight = title.offsetHeight * scale;
           }
@@ -211,7 +211,7 @@ module.exports = function(opts) {
           parent = deck.parent,
           parentClasses = parent.classList,
           lastSlideIndex = slides.length - 1,
-          sampleSlide = (deck.slide() > 0 ? slides[0] : slides[lastSlideIndex]),
+          sampleSlide = deck.slide() > 0 ? slides[0] : slides[lastSlideIndex],
           transformProp = getStyleProperty(sampleSlide, 'transform'),
           transitionProp = getStyleProperty(sampleSlide, 'transition'),
           scaleParent = parent.querySelector('.bespoke-scale-parent'),
@@ -234,7 +234,7 @@ module.exports = function(opts) {
         });
         if (yShift || xShift) {
           slides.forEach(function(slide) {
-            var m = slide.style[transformProp].match(RE.transform);
+            var m = slide.style[transformProp].match(RE_TRANSFORM);
             slide.style[transformProp] = 'translate(' + (parseFloat(m[1]) - xShift) + 'px, ' + (parseFloat(m[2]) - yShift) + 'px) scale(' + m[3] + ')';
             flushStyle(slide, transitionProp, 'none', ''); // bypass transition, if any
           });
@@ -246,8 +246,8 @@ module.exports = function(opts) {
         overviewActive = null;
         if (!!opts.counter) parentClasses.remove('bespoke-overview-counter');
         parentClasses.add('bespoke-overview-from');
-        var numTransitions = (lastSlideIndex > 0 ? getTransitionProperties(sampleSlide).length :
-            (getTransitionProperties(sampleSlide).indexOf('transform') >= 0 ? 1 : 0));
+        var numTransitions = lastSlideIndex > 0 ? getTransitionProperties(sampleSlide).length :
+            (getTransitionProperties(sampleSlide).indexOf('transform') >= 0 ? 1 : 0);
         slides.forEach(function(slide) { slide.style[transformProp] = ''; });
         if (numTransitions > 0) {
           sampleSlide.addEventListener(TRANSITIONEND, (afterTransition = function(e) {
@@ -263,17 +263,17 @@ module.exports = function(opts) {
         overviewActive ? closeOverview() : openOverview(); // jshint ignore:line
       },
       onKeydown = function(e) {
-        if (e.which === KEYCODE.o) {
+        if (e.which === KEY_O) {
           if (!e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) toggleOverview();
         }
         else if (overviewActive) {
           switch (e.which) {
-            case KEYCODE.enter:
+            case KEY_ENT:
               if (!e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) closeOverview();
               break;
-            case KEYCODE.up:
+            case KEY_UP:
               return onNavigate(-columns, { index: deck.slide() });
-            case KEYCODE.down:
+            case KEY_DN:
               return onNavigate(columns, { index: deck.slide() });
           }
         }
