@@ -9,7 +9,7 @@ var simulant = require('simulant'),
 describe('bespoke-overview', function() {
   var KEYCODE = { o: 79, enter: 13, up: 38, down: 40 },
     isWebKit = 'webkitAppearance' in document.documentElement.style,
-    lastSlideIndex = 9,
+    lastSlideIndex,
     deck,
     setup = function() {
       document.title = 'bespoke-overview tests';
@@ -24,13 +24,15 @@ describe('bespoke-overview', function() {
           '.bespoke-active{opacity:1;pointer-events:auto}';
       document.head.appendChild(style);
     },
-    createDeck = function(enableScale, overviewPluginOptions) {
+    createDeck = function(enableScale, overviewPluginOptions, numSlides) {
+      if (numSlides === undefined) numSlides = 10;
+      lastSlideIndex = numSlides - 1;
       var deckParent = document.createElement('article');
       deckParent.className = 'deck';
       resizeDeck(deckParent, 800, 450, false);
-      for (var i = 0; i <= lastSlideIndex; i++) {
+      for (var i = 1; i <= numSlides; i++) {
         var section = document.createElement('section');
-        section.appendChild(document.createTextNode('' + (i + 1)));
+        section.appendChild(document.createTextNode(i));
         deckParent.appendChild(section);
       }
       document.body.appendChild(deckParent);
@@ -44,7 +46,6 @@ describe('bespoke-overview', function() {
         deck = bespoke.from('.deck', [
           classes(),
           scale(isWebKit ? 'zoom' : 'transform'),
-          //scale('transform'),
           overview(overviewPluginOptions)
         ]);
       }
@@ -509,90 +510,94 @@ describe('bespoke-overview', function() {
     });
   });
 
-  describe('transitions', function() {
-    beforeAll(function() {
-      var style = document.createElement('style');
-      style.textContent = '.bespoke-slide{-webkit-transition:opacity 0.5s ease;transition:opacity:0.5s ease}\n' +
-          '.bespoke-overview .bespoke-slide{-webkit-transition:none;transition:none}\n' +
-          '.bespoke-overview-to .bespoke-slide{-webkit-transition:-webkit-transform 0.1s ease-out 0s,opacity 0.1s ease-in-out 0.05s;transition:transform 0.1s ease-out 0s,opacity 0.1s ease-in-out 0.05s}\n' +
-          '.bespoke-overview-from .bespoke-slide{-webkit-transition:-webkit-transform 0.1s ease-in-out 0.05s,opacity 0.1s ease-in-out 0s;transition:transform 0.1s ease-in-out 0.05s,opacity 0.1s ease-in-out 0s}\n' +
-          '.no-transition .bespoke-slide{-webkit-transition:none!important;transition:none!important}';
-      document.head.appendChild(style);
-    });
+  [10, 1].forEach(function(numSlides) {
+    describe('transitions', function() {
+      beforeAll(function() {
+        var style = document.createElement('style');
+        style.textContent = '.bespoke-slide{-webkit-transition:opacity 0.5s ease;transition:opacity:0.5s ease}\n' +
+            '.bespoke-overview .bespoke-slide{-webkit-transition:none;transition:none}\n' +
+            '.bespoke-overview-to .bespoke-slide{-webkit-transition:-webkit-transform 0.1s ease-out 0s,opacity 0.1s ease-in-out 0.05s;transition:transform 0.1s ease-out 0s,opacity 0.1s ease-in-out 0.05s}\n' +
+            '.bespoke-overview-from .bespoke-slide{-webkit-transition:-webkit-transform 0.1s ease-in-out 0.05s,opacity 0.1s ease-in-out 0s;transition:transform 0.1s ease-in-out 0.05s,opacity 0.1s ease-in-out 0s}\n' +
+            '.no-transition .bespoke-slide{-webkit-transition:none!important;transition:none!important}';
+        document.head.appendChild(style);
+      });
 
-    beforeEach(function() { createDeck(); });
+      beforeEach(function() { createDeck(false, undefined, numSlides); });
 
-    it('uses transition defined by bespoke-overview-to class when opening overview', function(done) {
-      openOverview(true);
-      expect(deck.parent.classList).toContain('bespoke-overview-to');
-      setTimeout(function() {
-        expect(deck.parent.classList).not.toContain('bespoke-overview-to');
-        done();
-      }, 200);
-    });
-
-    it('uses transition defined by bespoke-overview-from class when closing overview', function(done) {
-      deck.parent.classList.add('no-transition');
-      openOverview(true);
-      deck.parent.classList.remove('no-transition');
-      expect(deck.parent.classList).not.toContain('bespoke-overview-to');
-      closeOverview(true);
-      expect(deck.parent.classList).toContain('bespoke-overview-from');
-      setTimeout(function() {
-        expect(deck.parent.classList).not.toContain('bespoke-overview-from');
-        done();
-      }, 200);
-    });
-
-    it('uses transition defined by bespoke-overview bespoke-slide class when navigating in overview', function() {
-      deck.parent.classList.add('no-transition');
-      openOverview(true);
-      deck.parent.classList.remove('no-transition');
-      expect(deck.parent.classList).not.toContain('bespoke-overview-to');
-      expect(deck.slide()).toBe(0); 
-      deck.next();
-      expect(deck.slide()).toBe(1);
-    });
-
-    it('should return slide to original position after closing overview', function(done) {
-      var before = deck.slides[0].getBoundingClientRect();
-      openOverview(true);
-      setTimeout(function() {
-        closeOverview(true);
-        setTimeout(function() {
-          var after = deck.slides[0].getBoundingClientRect();
-          expect(before.left).toBe(after.left);
-          expect(before.top).toBe(after.top);
-          done();
-        }, 200);
-      }, 200);
-    });
-
-    it('removes stale transition when opening overview', function(done) {
-      deck.parent.classList.add('no-transition');
-      openOverview(true);
-      deck.parent.classList.remove('no-transition');
-      closeOverview(true);
-      setTimeout(function() {
+      it('uses transition defined by bespoke-overview-to class when opening overview', function(done) {
         openOverview(true);
-        expect(deck.parent.classList).not.toContain('bespoke-overview-from');
+        expect(deck.parent.classList).toContain('bespoke-overview-to');
         setTimeout(function() {
           expect(deck.parent.classList).not.toContain('bespoke-overview-to');
           done();
         }, 200);
-      }, 50);
-    });
+      });
 
-    it('removes stale transition when closing overview', function(done) {
-      openOverview(true);
-      setTimeout(function() {
-        closeOverview(true);
+      it('uses transition defined by bespoke-overview-from class when closing overview', function(done) {
+        deck.parent.classList.add('no-transition');
+        openOverview(true);
+        deck.parent.classList.remove('no-transition');
         expect(deck.parent.classList).not.toContain('bespoke-overview-to');
+        closeOverview(true);
+        expect(deck.parent.classList).toContain('bespoke-overview-from');
         setTimeout(function() {
           expect(deck.parent.classList).not.toContain('bespoke-overview-from');
           done();
         }, 200);
-      }, 50);
+      });
+
+      if (numSlides > 1) {
+        it('uses transition defined by bespoke-overview bespoke-slide class when navigating in overview', function() {
+          deck.parent.classList.add('no-transition');
+          openOverview(true);
+          deck.parent.classList.remove('no-transition');
+          expect(deck.parent.classList).not.toContain('bespoke-overview-to');
+          expect(deck.slide()).toBe(0); 
+          deck.next();
+          expect(deck.slide()).toBe(1);
+        });
+      }
+
+      it('should return slide to original position after closing overview', function(done) {
+        var before = deck.slides[0].getBoundingClientRect();
+        openOverview(true);
+        setTimeout(function() {
+          closeOverview(true);
+          setTimeout(function() {
+            var after = deck.slides[0].getBoundingClientRect();
+            expect(before.left).toBe(after.left);
+            expect(before.top).toBe(after.top);
+            done();
+          }, 200);
+        }, 200);
+      });
+
+      it('removes stale transition when opening overview', function(done) {
+        deck.parent.classList.add('no-transition');
+        openOverview(true);
+        deck.parent.classList.remove('no-transition');
+        closeOverview(true);
+        setTimeout(function() {
+          openOverview(true);
+          expect(deck.parent.classList).not.toContain('bespoke-overview-from');
+          setTimeout(function() {
+            expect(deck.parent.classList).not.toContain('bespoke-overview-to');
+            done();
+          }, 200);
+        }, 50);
+      });
+
+      it('removes stale transition when closing overview', function(done) {
+        openOverview(true);
+        setTimeout(function() {
+          closeOverview(true);
+          expect(deck.parent.classList).not.toContain('bespoke-overview-to');
+          setTimeout(function() {
+            expect(deck.parent.classList).not.toContain('bespoke-overview-from');
+            done();
+          }, 200);
+        }, 50);
+      });
     });
   });
 });
