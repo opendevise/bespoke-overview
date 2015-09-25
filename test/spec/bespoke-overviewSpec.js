@@ -440,6 +440,46 @@ describe('bespoke-overview', function() {
       });
     });
 
+    ['?overview', '?foo=bar&overview', '?overview&foo=bar'].forEach(function(qs) {
+      describe('autostart via URL with query string ' + qs, function() {
+        beforeEach(function() {
+          history.replaceState(null, null, location.pathname + qs);
+          createDeck(true);
+        });
+
+        it('starts in overview mode when overview param is present in the URL', function(done) {
+          setTimeout(function() {
+            expect(deck.parent.classList).toContain('bespoke-overview');
+            closeOverview(true);
+            history.replaceState(null, null, location.pathname);
+            done();
+          }, 250);
+        });
+      });
+    });
+
+    describe('location option', function() {
+      beforeEach(function() { createDeck(true, { location: true }); });
+
+      it('adds overview param to query string when overview is open', function() {
+        expect(location.search).toBe('');
+        openOverview(true);
+        expect(location.search).toBe('?overview');
+        closeOverview(true);
+        expect(location.search).toBe('');
+      });
+
+      it('adds overview param to existing query string when overview is open', function() {
+        history.replaceState(null, null, location.pathname + '?foo=bar');
+        expect(location.search).toBe('?foo=bar');
+        openOverview(true);
+        expect(location.search).toBe('?foo=bar&overview');
+        closeOverview(true);
+        expect(location.search).toBe('?foo=bar');
+        history.replaceState(null, null, location.pathname);
+      });
+    });
+
     describe('counter option', function() {
       beforeEach(function() { createDeck(true, { counter: true }); });
 

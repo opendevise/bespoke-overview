@@ -126,6 +126,10 @@ This value is scaled by the same amount as the slides in overview mode.
 autostart _(type: boolean, default: false)_::
 A flag that controls whether the presentation starts in overview mode.
 
+location _(type: boolean, default: false)_::
+A flag that controls whether the query string is synchronized with the overview's state.
+The `overview` parameter is added to the query string when the overview is open when this flag is enabled (e.g., `?overview`).
+
 counter _(type: boolean, default: false)_::
 A flag that controls whether numbers are shown on the slides when in overview mode.
 When enabled, adds the `bespoke-overview-counter` class to the deck parent element.
@@ -151,7 +155,7 @@ Here's an example showing most of the options in use:
 bespoke.from('.deck', [
   classes(),
   keys(),
-  overview({ columns: 2, margin: 10, autostart: true, counter: true, title: true })
+  overview({ columns: 2, margin: 10, autostart: true, location: true, counter: true, title: true })
 ]);
 ```
 

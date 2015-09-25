@@ -21,7 +21,7 @@ module.exports = function(opts) {
   return function(deck) {
     opts = typeof opts === 'object' ? opts : {};
     var KEY_O = 79, KEY_ENT = 13, KEY_UP = 38, KEY_DN = 40,
-      RE_CSV = /, */, RE_NONE = /^none(?:, ?none)*$/, RE_TRANSFORM = /^translate\((.+?)px, ?(.+?)px\) scale\((.+?)\)$/,
+      RE_CSV = /, */, RE_NONE = /^none(?:, ?none)*$/, RE_TRANS = /^translate\((.+?)px, ?(.+?)px\) scale\((.+?)\)$/, RE_MODE = /(^\?|&)overview(?=$|&)/,
       TRANSITIONEND = !('transition' in document.body.style) && ('webkitTransition' in document.body.style) ? 'webkitTransitionEnd' : 'transitionend',
       VENDOR = ['webkit', 'Moz', 'ms'],
       columns = typeof opts.columns === 'number' ? parseInt(opts.columns) : 3,
@@ -65,7 +65,7 @@ module.exports = function(opts) {
       onReady = function() {
         deck.on('activate', onReady)(); // unregisters listener
         deck.parent.scrollLeft = deck.parent.scrollTop = 0;
-        if (!!opts.autostart) setTimeout(openOverview, 100); // slight timeout to allow transitions to prepare
+        if (!!opts.autostart || RE_MODE.test(location.search)) setTimeout(openOverview, 100); // timeout allows transitions to prepare
       },
       onSlideClick = function() {
         closeOverview(deck.slides.indexOf(this));
@@ -73,11 +73,20 @@ module.exports = function(opts) {
       onNavigate = function(offset, e) {
         var targetIndex = e.index + offset;
         // IMPORTANT must use deck.slide to navigate and return false in order to circumvent bespoke-bullets behavior
-        if (targetIndex > -1 && targetIndex < deck.slides.length) deck.slide(targetIndex, { preview: true });
+        if (targetIndex >= 0 && targetIndex < deck.slides.length) deck.slide(targetIndex, { preview: true });
         return false;
       },
       onActivate = function(e) {
         if (e.scrollIntoView !== false) scrollSlideIntoView(e.slide, e.index, getZoomFactor(e.slide));
+      },
+      updateLocation = function(state) {
+        var s = location.search.replace(RE_MODE, '').replace(/^[^?]/, '?$&');
+        if (state) {
+          history.replaceState(null, null, location.pathname + (s.length > 0 ? s + '&' : '?') + 'overview' + location.hash);
+        }
+        else {
+          history.replaceState(null, null, location.pathname + s + location.hash);
+        }
       },
       scrollSlideIntoView = function(slide, index, zoomFactor) {
         deck.parent.scrollTop = index < columns ? 0 : deck.parent.scrollTop + slide.getBoundingClientRect().top * (zoomFactor || 1);
@@ -132,9 +141,10 @@ module.exports = function(opts) {
           addEventListener('resize', openOverview, false);
           overviewActive = [deck.on('activate', onActivate), deck.on('prev', onNavigate.bind(null, -1)), deck.on('next', onNavigate.bind(null, 1))];
           if (!!opts.counter) parentClasses.add('bespoke-overview-counter');
+          if (!!opts.location) updateLocation(true);
           parentClasses.add('bespoke-overview-to');
           numTransitions = lastSlideIndex > 0 ? getTransitionProperties(sampleSlide).length :
-              (getTransitionProperties(sampleSlide).indexOf('transform') >= 0 ? 1 : 0);
+              (getTransitionProperties(sampleSlide).join(' ').indexOf('transform') < 0 ? 0 : 1);
           parent.style.overflowY = 'scroll'; // gives us fine-grained control
           parent.style.scrollBehavior = 'smooth'; // not supported by all browsers
           if (isWebKit) slides.forEach(function(slide) { flushStyle(slide, 'marginBottom', '0%', ''); });
@@ -170,8 +180,8 @@ module.exports = function(opts) {
           var x = col * scaledSlideWidth + (col + 1) * scaledMargin - scrollbarOffset - slideX,
             y = row * scaledSlideHeight + (row + 1) * scaledMargin + scaledTitleHeight - slideY;
           // NOTE drop scientific notation for numbers near 0 as it confuses WebKit
-          slide.style[transformProp] = 'translate(' + (x.toString().indexOf('e-') >= 0 ? 0 : x) + 'px, ' +
-              (y.toString().indexOf('e-') >= 0 ? 0 : y) + 'px) scale(' + scale + ')';
+          slide.style[transformProp] = 'translate(' + (x.toString().indexOf('e-') < 0 ? x : 0) + 'px, ' +
+              (y.toString().indexOf('e-') < 0 ? y : 0) + 'px) scale(' + scale + ')';
           // NOTE add margin to last slide to leave gap below last row; only honored by WebKit
           if (row * columns + col === lastSlideIndex) slide.style.marginBottom = margin + 'px';
           slide.addEventListener('click', onSlideClick, false);
@@ -234,7 +244,7 @@ module.exports = function(opts) {
         });
         if (yShift || xShift) {
           slides.forEach(function(slide) {
-            var m = slide.style[transformProp].match(RE_TRANSFORM);
+            var m = slide.style[transformProp].match(RE_TRANS);
             slide.style[transformProp] = 'translate(' + (parseFloat(m[1]) - xShift) + 'px, ' + (parseFloat(m[2]) - yShift) + 'px) scale(' + m[3] + ')';
             flushStyle(slide, transitionProp, 'none', ''); // bypass transition, if any
           });
@@ -242,12 +252,13 @@ module.exports = function(opts) {
         parent.scrollTop = 0;
         parentClasses.remove('bespoke-overview');
         removeEventListener('resize', openOverview, false);
-        if (Array.isArray(overviewActive)) overviewActive.forEach(function(unbindEvent) { unbindEvent(); });
+        (overviewActive || []).forEach(function(unbindEvent) { unbindEvent(); });
         overviewActive = null;
         if (!!opts.counter) parentClasses.remove('bespoke-overview-counter');
+        if (!!opts.location) updateLocation(false);
         parentClasses.add('bespoke-overview-from');
         var numTransitions = lastSlideIndex > 0 ? getTransitionProperties(sampleSlide).length :
-            (getTransitionProperties(sampleSlide).indexOf('transform') >= 0 ? 1 : 0);
+            (getTransitionProperties(sampleSlide).join(' ').indexOf('transform') < 0 ? 0 : 1);
         slides.forEach(function(slide) { slide.style[transformProp] = ''; });
         if (numTransitions > 0) {
           sampleSlide.addEventListener(TRANSITIONEND, (afterTransition = function(e) {
