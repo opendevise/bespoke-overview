@@ -175,6 +175,13 @@ describe('bespoke-overview', function() {
           expect(deck.parent.classList).not.toContain('bespoke-overview');
           expect(deck.slide()).toBe(2);
         });
+
+        it('toggles overview when overview.toggle event is fired', function() {
+          deck.fire('overview.toggle');
+          expect(deck.parent.classList).toContain('bespoke-overview');
+          deck.fire('overview.toggle');
+          expect(deck.parent.classList).not.toContain('bespoke-overview');
+        });
       });
 
       describe('layout and appearance', function() {
