@@ -15,9 +15,10 @@ image:https://img.shields.io/npm/v/bespoke-overview.svg[npm package, link=https:
 image:https://img.shields.io/travis/opendevise/bespoke-overview/master.svg[Build Status (Travis CI), link=https://travis-ci.org/opendevise/bespoke-overview]
 endif::[]
 
-This plugin adds an overview mode to your http://markdalgleish.com/projects/bespoke.js[Bespoke.js] presentation, which makes all the slides visible and arranges them on a grid when the kbd:[o] key is pressed.
-This mode gives you a “big picture” view of your presentation.
-You can also use it as a navigation aid to jump to an arbitrary slide.
+This plugin adds an overview mode (aka light table or storyboard) to your http://markdalgleish.com/projects/bespoke.js[Bespoke.js] presentation.
+In this mode, all the slides become visible and are arranged on a grid.
+You activate this mode by pressing the kbd:[o] key.
+In addition to giving you a “big picture” view of your presentation, you can use this mode as a navigation aid to jump to an arbitrary slide.
 
 image::demo/screenshot.png[Screenshot of bespoke-overview]
 
