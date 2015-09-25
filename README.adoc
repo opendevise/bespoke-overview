@@ -43,15 +43,11 @@ Download the {uri-raw-file-base}/dist/bespoke-overview.min.js[production mode ve
 
 === npm
 
-```bash
-$ npm install bespoke-overview
-```
+ $ npm install bespoke-overview
 
 === Bower
 
-```bash
-$ bower install bespoke-overview
-```
+ $ bower install bespoke-overview
 
 == Usage
 
@@ -157,6 +153,11 @@ bespoke.from('.deck', [
   overview({ columns: 2, margin: 10, autostart: true, counter: true, title: true })
 ]);
 ```
+
+=== Plugin dependencies
+
+The https://www.npmjs.com/package/bespoke-classes[bespoke-classes] plugin must be enabled in order for the bespoke-overview plugin to function properly.
+A theme (either one that is published or a custom one) is also recommended.
 
 === Plugin order
 
