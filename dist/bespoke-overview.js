@@ -294,7 +294,7 @@ module.exports = function(opts) {
       removeEventListener('resize', openOverview, false);
       document.removeEventListener('keydown', onKeydown, false);
     });
-    deck.on('overview.toggle', toggleOverview);
+    deck.on('overview', toggleOverview);
     document.addEventListener('keydown', onKeydown, false);
   };
 };

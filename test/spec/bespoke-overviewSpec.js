@@ -177,10 +177,10 @@ describe('bespoke-overview', function() {
           expect(deck.slide()).toBe(2);
         });
 
-        it('toggles overview when overview.toggle event is fired', function() {
-          deck.fire('overview.toggle');
+        it('toggles overview when overview event is fired', function() {
+          deck.fire('overview');
           expect(deck.parent.classList).toContain('bespoke-overview');
-          deck.fire('overview.toggle');
+          deck.fire('overview');
           expect(deck.parent.classList).not.toContain('bespoke-overview');
         });
       });
