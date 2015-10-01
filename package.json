@@ -25,9 +25,8 @@
   "devDependencies": {
     "bespoke": "^1.0.0",
     "bespoke-classes": "^1.0.0",
-    "bespoke-keys": "^1.0.0",
-    "bespoke-touch": "^1.0.0",
-    "bespoke-scale": "^1.0.0",
+    "bespoke-nav": "^1.0.1",
+    "bespoke-scale": "^1.0.1",
     "browserify": "^11.0.1",
     "del": "^1.2.0",
     "function-bind": "^1.0.2",

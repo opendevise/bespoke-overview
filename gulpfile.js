@@ -81,8 +81,7 @@ gulp.task('compile:demo:js', ['compile'], function() {
   return gulp.src([
       'node_modules/bespoke/dist/bespoke.js',
       'node_modules/bespoke-classes/dist/bespoke-classes.js',
-      'node_modules/bespoke-keys/dist/bespoke-keys.js',
-      'node_modules/bespoke-touch/dist/bespoke-touch.js',
+      'node_modules/bespoke-nav/dist/bespoke-nav.js',
       'node_modules/bespoke-scale/dist/bespoke-scale.js',
       'dist/bespoke-overview.js',
       'demo/demo.js'
