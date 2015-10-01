@@ -151,7 +151,7 @@ A flag that controls whether the title element is scaled proportionally to the s
 
 Here's an example showing most of the options in use:
 
-```
+```js
 bespoke.from('.deck', [
   classes(),
   keys(),
