@@ -23,7 +23,7 @@ module.exports = function(opts) {
     var KEY_O = 79, KEY_ENT = 13, KEY_UP = 38, KEY_DN = 40,
       RE_CSV = /, */, RE_NONE = /^none(?:, ?none)*$/, RE_TRANS = /^translate\((.+?)px, ?(.+?)px\) scale\((.+?)\)$/, RE_MODE = /(^\?|&)overview(?=$|&)/,
       TRANSITIONEND = !('transition' in document.body.style) && ('webkitTransition' in document.body.style) ? 'webkitTransitionEnd' : 'transitionend',
-      VENDOR = ['webkit', 'Moz', 'ms'],
+      VENDOR = ['webkit', 'Moz'],
       columns = typeof opts.columns === 'number' ? parseInt(opts.columns) : 3,
       margin = typeof opts.margin === 'number' ? parseFloat(opts.margin) : 15,
       overviewActive = null,
