@@ -128,7 +128,7 @@ A flag that controls whether the presentation starts in overview mode.
 
 location _(type: boolean, default: false)_::
 A flag that controls whether the query string is synchronized with the overview's state.
-The `overview` parameter is added to the query string when the overview is open when this flag is enabled (e.g., `?overview`).
+When this flag is enabled (e.g., `?overview`), the `overview` parameter is added to the query string whenever the overview is open.
 
 counter _(type: boolean, default: false)_::
 A flag that controls whether numbers are shown on the slides when in overview mode.
@@ -312,6 +312,27 @@ If you enable the title, you can also use the `bespoke-overview-to` and `bespoke
 ```
 
 IMPORTANT: The `visibility` property is important as it overrides the built-in behavior necessary to work when transitions on the title are not used.
+
+== Events
+
+The bespoke-overview plugin responds to the following events:
+
+[cols="1s,4"]
+|===
+|Event Name |Description
+
+|overview
+|Toggles the overview.
+If the overview is open, it is closed.
+If the overview is closed, it is opened.
+|===
+
+You trigger an event using the built-in `fire` method on the deck instance anywhere within a plugin.
+For example, to toggle the overview, invoke:
+
+```js
+deck.fire('overview');
+```
 
 == License
 
