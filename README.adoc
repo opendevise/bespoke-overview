@@ -1,12 +1,13 @@
 = bespoke-overview
 Dan Allen <https://github.com/mojavelinux>
+v1.0.4, 2015-10-13
 // Settings:
 :idprefix:
 :idseparator: -
 :experimental:
 ifdef::env-github[:badges:]
 // Variables:
-:release-version: v1.0.3
+:release-version: v1.0.4
 // URIs:
 :uri-raw-file-base: https://raw.githubusercontent.com/opendevise/bespoke-overview/{release-version}
 

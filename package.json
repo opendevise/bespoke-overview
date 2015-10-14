@@ -1,6 +1,6 @@
 {
   "name": "bespoke-overview",
-  "version": "1.0.4-dev",
+  "version": "1.0.4",
   "description": "Presents an overview of all the slides in a Bespoke.js presentation.",
   "homepage": "https://github.com/opendevise/bespoke-overview",
   "bugs": "https://github.com/opendevise/bespoke-overview/issues",
