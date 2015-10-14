@@ -136,76 +136,75 @@ module.exports = function() {
 (1)
 });
 /*!
- * bespoke-keys v1.0.0
+ * bespoke-nav v1.0.1
  *
- * Copyright 2015, Mark Dalgleish
+ * Copyright 2015, Dan Allen
  * This content is released under the MIT license
- * http://mit-license.org/markdalgleish
  */
 
-!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var n;"undefined"!=typeof window?n=window:"undefined"!=typeof global?n=global:"undefined"!=typeof self&&(n=self);var o=n;o=o.bespoke||(o.bespoke={}),o=o.plugins||(o.plugins={}),o.keys=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-module.exports = function(options) {
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g=(g.bespoke||(g.bespoke = {}));g=(g.plugins||(g.plugins = {}));g.nav = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+module.exports = function(opts) {
+  opts = opts || {};
+  var kbd = require('bespoke-nav-kbd')(opts.kbd);
+  var touch = require('bespoke-nav-touch')(opts.touch);
   return function(deck) {
-    var isHorizontal = options !== 'vertical';
-
-    document.addEventListener('keydown', function(e) {
-      if (e.which == 34 || // PAGE DOWN
-        (e.which == 32 && !e.shiftKey) || // SPACE WITHOUT SHIFT
-        (isHorizontal && e.which == 39) || // RIGHT
-        (!isHorizontal && e.which == 40) // DOWN
-      ) { deck.next(); }
-
-      if (e.which == 33 || // PAGE UP
-        (e.which == 32 && e.shiftKey) || // SPACE + SHIFT
-        (isHorizontal && e.which == 37) || // LEFT
-        (!isHorizontal && e.which == 38) // UP
-      ) { deck.prev(); }
-    });
+    kbd(deck);
+    touch(deck);
   };
 };
 
-},{}]},{},[1])
-(1)
-});
-/*!
- * bespoke-touch v1.0.0
- *
- * Copyright 2014, Mark Dalgleish
- * This content is released under the MIT license
- * http://mit-license.org/markdalgleish
- */
-
-!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var o;"undefined"!=typeof window?o=window:"undefined"!=typeof global?o=global:"undefined"!=typeof self&&(o=self);var n=o;n=n.bespoke||(n.bespoke={}),n=n.plugins||(n.plugins={}),n.touch=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
-module.exports = function(options) {
+},{"bespoke-nav-kbd":2,"bespoke-nav-touch":3}],2:[function(require,module,exports){
+module.exports = function() {
   return function(deck) {
-    var axis = options == 'vertical' ? 'Y' : 'X',
-      startPosition,
-      delta;
-
-    deck.parent.addEventListener('touchstart', function(e) {
-      if (e.touches.length == 1) {
-        startPosition = e.touches[0]['page' + axis];
-        delta = 0;
-      }
-    });
-
-    deck.parent.addEventListener('touchmove', function(e) {
-      if (e.touches.length == 1) {
-        e.preventDefault();
-        delta = e.touches[0]['page' + axis] - startPosition;
-      }
-    });
-
-    deck.parent.addEventListener('touchend', function() {
-      if (Math.abs(delta) > 50) {
-        deck[delta > 0 ? 'prev' : 'next']();
-      }
-    });
+    var KEY_SB = 32, KEY_PGUP = 33, KEY_PGDN = 34, KEY_END = 35, KEY_HME = 36,
+        KEY_LT = 37, KEY_RT = 39, KEY_H = 72, KEY_L = 76,
+      isModifierPressed = function(e, keyCode) {
+        return e.ctrlKey || (e.shiftKey && keyCode !== KEY_SB) || e.altKey || e.metaKey;
+      },
+      onKeydown = function(e) {
+        if (!isModifierPressed(e, e.which)) {
+          switch(e.which) {
+            case KEY_SB: return e.shiftKey ? deck.prev() : deck.next();
+            case KEY_RT: case KEY_PGDN: case KEY_L: return deck.next();
+            case KEY_LT: case KEY_PGUP: case KEY_H: return deck.prev();
+            case KEY_HME: return deck.slide(0);
+            case KEY_END: return deck.slide(deck.slides.length - 1);
+          }
+        }
+      };
+    deck.on('destroy', function() { document.removeEventListener('keydown', onKeydown); });
+    document.addEventListener('keydown', onKeydown);
   };
 };
 
-},{}]},{},[1])
-(1)
+},{}],3:[function(require,module,exports){
+module.exports = function(opts) {
+  return function(deck) {
+    opts = opts || {};
+    var TOUCHSTART = 'touchstart', TOUCHMOVE = 'touchmove', start = null,
+      axis = 'page' + (opts.axis && ['x', 'y'].indexOf(opts.axis) !== -1 ? opts.axis.toUpperCase() : 'X'),
+      gap = (typeof opts.threshold === 'number' ? Math.abs(opts.threshold) : Math.ceil(50 / window.devicePixelRatio)),
+      onTouchstart = function(e) {
+        if (e.touches.length === 1) start = e.touches[0][axis];
+      },
+      onTouchmove = function(e) {
+        if (start === null) return;
+        var delta = e.touches[0][axis] - start;
+        if (Math.abs(delta) > gap) {
+          deck[delta > 0 ? 'prev' : 'next']();
+          start = null;
+        }
+      };
+    deck.on('destroy', function() {
+      deck.parent.removeEventListener(TOUCHSTART, onTouchstart);
+      deck.parent.removeEventListener(TOUCHMOVE, onTouchmove);
+    });
+    deck.parent.addEventListener(TOUCHSTART, onTouchstart);
+    deck.parent.addEventListener(TOUCHMOVE, onTouchmove);
+  };
+};
+
+},{}]},{},[1])(1)
 });
 /*!
  * bespoke-scale v1.0.1
@@ -266,7 +265,7 @@ module.exports = function(options) {
 (1)
 });
 /*!
- * bespoke-overview v1.0.2
+ * bespoke-overview v1.0.4
  *
  * Copyright 2015, Dan Allen
  * This content is released under the MIT license
@@ -286,16 +285,15 @@ module.exports = function(opts) {
     '.bespoke-overview:not(.bespoke-overview-to) .bespoke-title{visibility:visible}' +
     '.bespoke-overview-to .bespoke-active,.bespoke-overview-from .bespoke-active{z-index:1}', { prepend: true });
   return function(deck) {
-    opts = (typeof opts === 'object' ? opts : {});
-    var KEYCODE = { o: 79, enter: 13, up: 38, down: 40 },
-      RE = { csv: /, */, none: /^none(?:, ?none)*$/, transform: /^translate\((.+?)px, ?(.+?)px\) scale\((.+?)\)$/ },
-      TRANSITIONEND = (!('transition' in document.body.style) && ('webkitTransition' in document.body.style) ? 'webkitTransitionEnd' : 'transitionend'),
-      VENDOR = ['webkit', 'Moz', 'ms'],
-      columns = (typeof opts.columns === 'number' ? parseInt(opts.columns) : 3),
-      margin = (typeof opts.margin === 'number' ? parseFloat(opts.margin) : 15),
-      overviewActive = false,
+    opts = typeof opts === 'object' ? opts : {};
+    var KEY_O = 79, KEY_ENT = 13, KEY_UP = 38, KEY_DN = 40,
+      RE_CSV = /, */, RE_NONE = /^none(?:, ?none)*$/, RE_TRANS = /^translate\((.+?)px, ?(.+?)px\) scale\((.+?)\)$/, RE_MODE = /(^\?|&)overview(?=$|&)/,
+      TRANSITIONEND = !('transition' in document.body.style) && ('webkitTransition' in document.body.style) ? 'webkitTransitionEnd' : 'transitionend',
+      VENDOR = ['webkit', 'Moz'],
+      columns = typeof opts.columns === 'number' ? parseInt(opts.columns) : 3,
+      margin = typeof opts.margin === 'number' ? parseFloat(opts.margin) : 15,
+      overviewActive = null,
       afterTransition,
-      loaded = false,
       getStyleProperty = function(element, name) {
         if (!(name in element.style)) {
           var properName = name.charAt(0).toUpperCase() + name.substr(1);
@@ -315,11 +313,11 @@ module.exports = function(opts) {
         var result = [],
           style = getComputedStyle(element),
           transitionProperty = style[getStyleProperty(element, 'transitionProperty')];
-        if (!transitionProperty || RE.none.test(transitionProperty)) return result;
+        if (!transitionProperty || RE_NONE.test(transitionProperty)) return result;
         // NOTE beyond this point, assume computed style returns compliant values
-        transitionProperty = transitionProperty.split(RE.csv);
-        var transitionDuration = style[getStyleProperty(element, 'transitionDuration')].split(RE.csv),
-          transitionDelay = style[getStyleProperty(element, 'transitionDelay')].split(RE.csv);
+        transitionProperty = transitionProperty.split(RE_CSV);
+        var transitionDuration = style[getStyleProperty(element, 'transitionDuration')].split(RE_CSV),
+          transitionDelay = style[getStyleProperty(element, 'transitionDelay')].split(RE_CSV);
         transitionProperty.forEach(function(property, i) {
           if (transitionDuration[i] !== '0s' || transitionDelay[i] !== '0s') result.push(property);
         });
@@ -330,28 +328,34 @@ module.exports = function(opts) {
         element.offsetHeight; // jshint ignore: line
         if (property) element.style[property] = to;
       },
+      onReady = function() {
+        deck.on('activate', onReady)(); // unregisters listener
+        deck.parent.scrollLeft = deck.parent.scrollTop = 0;
+        if (!!opts.autostart || RE_MODE.test(location.search)) setTimeout(openOverview, 100); // timeout allows transitions to prepare
+      },
       onSlideClick = function() {
         closeOverview(deck.slides.indexOf(this));
       },
       onNavigate = function(offset, e) {
-        if (overviewActive) {
-          var targetIndex = e.index + offset;
-          // IMPORTANT must use deck.slide to navigate in order to bypass bullets
-          if (targetIndex > -1 && targetIndex < deck.slides.length) deck.slide(targetIndex, { preview: true });
-          return false;
-        }
+        var targetIndex = e.index + offset;
+        // IMPORTANT must use deck.slide to navigate and return false in order to circumvent bespoke-bullets behavior
+        if (targetIndex >= 0 && targetIndex < deck.slides.length) deck.slide(targetIndex, { preview: true });
+        return false;
       },
       onActivate = function(e) {
-        if (!loaded) {
-          loaded = true;
-          deck.parent.scrollLeft = deck.parent.scrollTop = 0;
-          if (!!opts.autostart) setTimeout(openOverview, 100); // slight timeout to allow transitions to prepare
-          return;
+        if (e.scrollIntoView !== false) scrollSlideIntoView(e.slide, e.index, getZoomFactor(e.slide));
+      },
+      updateLocation = function(state) {
+        var s = location.search.replace(RE_MODE, '').replace(/^[^?]/, '?$&');
+        if (state) {
+          history.replaceState(null, null, location.pathname + (s.length > 0 ? s + '&' : '?') + 'overview' + location.hash);
         }
-        if (overviewActive && e.scrollIntoView !== false) scrollSlideIntoView(e.slide, e.index, getZoomFactor(e.slide));
+        else {
+          history.replaceState(null, null, location.pathname + s + location.hash);
+        }
       },
       scrollSlideIntoView = function(slide, index, zoomFactor) {
-        deck.parent.scrollTop = (index < columns ? 0 : deck.parent.scrollTop + slide.getBoundingClientRect().top * (zoomFactor || 1));
+        deck.parent.scrollTop = index < columns ? 0 : deck.parent.scrollTop + slide.getBoundingClientRect().top * (zoomFactor || 1);
       },
       removeAfterTransition = function(direction, parentClasses, slide, slideAlt) {
         slide.removeEventListener(TRANSITIONEND, afterTransition, false);
@@ -380,7 +384,7 @@ module.exports = function(opts) {
           parentClasses = parent.classList,
           lastSlideIndex = slides.length - 1,
           activeSlideIndex = deck.slide(),
-          sampleSlide = (activeSlideIndex > 0 ? slides[0] : slides[lastSlideIndex]),
+          sampleSlide = activeSlideIndex > 0 ? slides[0] : slides[lastSlideIndex],
           transformProp = getStyleProperty(sampleSlide, 'transform'),
           scaleParent = parent.querySelector('.bespoke-scale-parent'),
           baseScale = 1,
@@ -400,11 +404,13 @@ module.exports = function(opts) {
         if (!resize) {
           deck.slide(activeSlideIndex, { preview: true });
           parentClasses.add('bespoke-overview');
-          overviewActive = true;
+          addEventListener('resize', openOverview, false);
+          overviewActive = [deck.on('activate', onActivate), deck.on('prev', onNavigate.bind(null, -1)), deck.on('next', onNavigate.bind(null, 1))];
           if (!!opts.counter) parentClasses.add('bespoke-overview-counter');
+          if (!!opts.location) updateLocation(true);
           parentClasses.add('bespoke-overview-to');
-          numTransitions = (lastSlideIndex > 0 ? getTransitionProperties(sampleSlide).length :
-              (getTransitionProperties(sampleSlide).indexOf('transform') >= 0 ? 1 : 0));
+          numTransitions = lastSlideIndex > 0 ? getTransitionProperties(sampleSlide).length :
+              (getTransitionProperties(sampleSlide).join(' ').indexOf('transform') < 0 ? 0 : 1);
           parent.style.overflowY = 'scroll'; // gives us fine-grained control
           parent.style.scrollBehavior = 'smooth'; // not supported by all browsers
           if (isWebKit) slides.forEach(function(slide) { flushStyle(slide, 'marginBottom', '0%', ''); });
@@ -427,7 +433,7 @@ module.exports = function(opts) {
           row = 0, col = 0;
         if (title) {
           if (opts.scaleTitle !== false) {
-            title.style[zoomFactor ? 'zoom' : transformProp] = (zoomFactor ? totalScale : 'scale(' + totalScale + ')');
+            title.style[zoomFactor ? 'zoom' : transformProp] = zoomFactor ? totalScale : 'scale(' + totalScale + ')';
             title.style.width = (parent.clientWidth / totalScale) + 'px';
             scaledTitleHeight = title.offsetHeight * scale;
           }
@@ -440,8 +446,8 @@ module.exports = function(opts) {
           var x = col * scaledSlideWidth + (col + 1) * scaledMargin - scrollbarOffset - slideX,
             y = row * scaledSlideHeight + (row + 1) * scaledMargin + scaledTitleHeight - slideY;
           // NOTE drop scientific notation for numbers near 0 as it confuses WebKit
-          slide.style[transformProp] = 'translate(' + (x.toString().indexOf('e-') >= 0 ? 0 : x) + 'px, ' +
-              (y.toString().indexOf('e-') >= 0 ? 0 : y) + 'px) scale(' + scale + ')';
+          slide.style[transformProp] = 'translate(' + (x.toString().indexOf('e-') < 0 ? x : 0) + 'px, ' +
+              (y.toString().indexOf('e-') < 0 ? y : 0) + 'px) scale(' + scale + ')';
           // NOTE add margin to last slide to leave gap below last row; only honored by WebKit
           if (row * columns + col === lastSlideIndex) slide.style.marginBottom = margin + 'px';
           slide.addEventListener('click', onSlideClick, false);
@@ -481,7 +487,7 @@ module.exports = function(opts) {
           parent = deck.parent,
           parentClasses = parent.classList,
           lastSlideIndex = slides.length - 1,
-          sampleSlide = (deck.slide() > 0 ? slides[0] : slides[lastSlideIndex]),
+          sampleSlide = deck.slide() > 0 ? slides[0] : slides[lastSlideIndex],
           transformProp = getStyleProperty(sampleSlide, 'transform'),
           transitionProp = getStyleProperty(sampleSlide, 'transition'),
           scaleParent = parent.querySelector('.bespoke-scale-parent'),
@@ -504,18 +510,21 @@ module.exports = function(opts) {
         });
         if (yShift || xShift) {
           slides.forEach(function(slide) {
-            var m = slide.style[transformProp].match(RE.transform);
+            var m = slide.style[transformProp].match(RE_TRANS);
             slide.style[transformProp] = 'translate(' + (parseFloat(m[1]) - xShift) + 'px, ' + (parseFloat(m[2]) - yShift) + 'px) scale(' + m[3] + ')';
             flushStyle(slide, transitionProp, 'none', ''); // bypass transition, if any
           });
         }
         parent.scrollTop = 0;
         parentClasses.remove('bespoke-overview');
-        overviewActive = false;
+        removeEventListener('resize', openOverview, false);
+        (overviewActive || []).forEach(function(unbindEvent) { unbindEvent(); });
+        overviewActive = null;
         if (!!opts.counter) parentClasses.remove('bespoke-overview-counter');
+        if (!!opts.location) updateLocation(false);
         parentClasses.add('bespoke-overview-from');
-        var numTransitions = (lastSlideIndex > 0 ? getTransitionProperties(sampleSlide).length :
-            (getTransitionProperties(sampleSlide).indexOf('transform') >= 0 ? 1 : 0));
+        var numTransitions = lastSlideIndex > 0 ? getTransitionProperties(sampleSlide).length :
+            (getTransitionProperties(sampleSlide).join(' ').indexOf('transform') < 0 ? 0 : 1);
         slides.forEach(function(slide) { slide.style[transformProp] = ''; });
         if (numTransitions > 0) {
           sampleSlide.addEventListener(TRANSITIONEND, (afterTransition = function(e) {
@@ -530,33 +539,28 @@ module.exports = function(opts) {
       toggleOverview = function() {
         overviewActive ? closeOverview() : openOverview(); // jshint ignore:line
       },
-      onResize = function() {
-        if (overviewActive) openOverview();
-      },
       onKeydown = function(e) {
-        if (e.which === KEYCODE.o) {
+        if (e.which === KEY_O) {
           if (!e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) toggleOverview();
         }
         else if (overviewActive) {
           switch (e.which) {
-            case KEYCODE.enter:
+            case KEY_ENT:
               if (!e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) closeOverview();
               break;
-            case KEYCODE.up:
+            case KEY_UP:
               return onNavigate(-columns, { index: deck.slide() });
-            case KEYCODE.down:
+            case KEY_DN:
               return onNavigate(columns, { index: deck.slide() });
           }
         }
       };
-    deck.on('activate', onActivate);
-    deck.on('next', onNavigate.bind(null, 1));
-    deck.on('prev', onNavigate.bind(null, -1));
+    deck.on('activate', onReady);
     deck.on('destroy', function() {
-      removeEventListener('resize', onResize, false);
+      removeEventListener('resize', openOverview, false);
       document.removeEventListener('keydown', onKeydown, false);
     });
-    addEventListener('resize', onResize, false);
+    deck.on('overview', toggleOverview);
     document.addEventListener('keydown', onKeydown, false);
   };
 };
@@ -587,17 +591,15 @@ module.exports = function (css, options) {
 
 },{}]},{},[1])(1)
 });
-var parent = document.querySelector('.deck'),
-  deck = bespoke.from(parent, [
-    bespoke.plugins.classes(),
-    bespoke.plugins.keys(),
-    bespoke.plugins.touch(),
-    //bespoke.plugins.scale(),
-    bespoke.plugins.scale('webkitAppearance' in parent.style ? 'zoom' : 'transform'),
-    //bespoke.plugins.scale('transform'),
-    bespoke.plugins.overview()
-    //bespoke.plugins.overview({ columns: 2, margin: 10, autostart: true, counter: true, title: true })
-  ]);
+var isWebKit = 'webkitAppearance' in document.documentElement.style;
+var deck = bespoke.from('.deck', [
+  bespoke.plugins.classes(),
+  bespoke.plugins.nav(),
+  bespoke.plugins.scale(isWebKit ? 'zoom' : 'transform'),
+  //bespoke.plugins.scale('transform'),
+  bespoke.plugins.overview()
+  //bespoke.plugins.overview({ columns: 2, margin: 10, autostart: true, location: true, counter: true, title: true })
+]);
 
 // expose API to other applications
 window.deck = deck;

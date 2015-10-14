@@ -9,7 +9,6 @@ html {
 }
 
 body {
-  font-family: 'Noto Sans', Arial, sans-serif;
   margin: 0;
 }
 
@@ -18,17 +17,23 @@ h1 {
 }
 
 p {
-  margin: 0.5em 0;
+  margin: 0.25em 0;
+  font-size: 0.85em;
 }
 
 .deck {
+  font-family: Arial, sans-serif;
   font-size: 2em;
   line-height: 1.6;
   color: #303030;
   /* enable kerning using forward-compatible CSS */
   text-rendering: optimizeLegibility;
-  font-feature-settings: "kern" 1;
-  font-kerning: normal;
+  -webkit-font-feature-settings: "kern" 1;
+     -moz-font-feature-settings: "kern" 1;
+          font-feature-settings: "kern" 1;
+  -webkit-font-kerning: normal;
+     -moz-font-kerning: normal;
+          font-kerning: normal;
 }
 
 /* Hide deck and slide content until bespoke.js has added classes */
@@ -61,7 +66,8 @@ p {
   overflow: hidden;
 }
 
-.bespoke-parent > :not(.bespoke-slide),
+//.bespoke-parent > :not(.bespoke-slide),
+.bespoke-scale-parent,
 .bespoke-slide {
   pointer-events: none;
 }
@@ -76,32 +82,27 @@ p {
   margin-left: -320px;
   height: 360px;
   margin-top: -180px;
+  display: -ms-flexbox;
   display: -webkit-flex;
-          display: flex;
+  display: flex;
+       -ms-flex-align: center;
   -webkit-align-items: center;
           align-items: center;
+            -ms-flex-pack: center;
   -webkit-justify-content: center;
           justify-content: center;
+      -ms-flex-direction: column;
   -webkit-flex-direction: column;
           flex-direction: column;
   /* QUESTION should we apply padding to inner content container instead? */
   padding: 1em;
   -webkit-transition: opacity 0.3s ease;
-     -moz-transition: opacity 0.3s ease;
-       -o-transition: opacity 0.3s ease;
           transition: opacity 0.3s ease;
 }
 
-.bespoke-inactive {
-  /* setting opacity here is redundant */
-  /*
-  opacity: 0;
-  */
-}
-
 .bespoke-active {
-  pointer-events: auto;
   opacity: 1;
+  pointer-events: auto;
   /* WebKit sometimes requires z-index when using transform-based scaling, though it has no affect on stacking order */
   z-index: 1;
 }
@@ -123,30 +124,22 @@ p {
 .bespoke-overview-to .bespoke-slide,
 .bespoke-overview-from .bespoke-slide {
   -webkit-transition: none;
-     -moz-transition: none;
-       -o-transition: none;
           transition: none;
 }
 */
 
 .bespoke-overview .bespoke-slide {
   -webkit-transition: none;
-     -moz-transition: none;
-       -o-transition: none;
           transition: none;
 }
 
 .bespoke-overview-to .bespoke-slide {
   -webkit-transition: -webkit-transform 0.5s ease-out 0s, opacity 0.5s ease-in-out 0.4s;
-     -moz-transition:    -moz-transform 0.5s ease-out 0s, opacity 0.5s ease-in-out 0.4s;
-       -o-transition:      -o-transform 0.5s ease-out 0s, opacity 0.5s ease-in-out 0.4s;
           transition:         transform 0.5s ease-out 0s, opacity 0.5s ease-in-out 0.4s;
 }
 
 .bespoke-overview-from .bespoke-slide {
   -webkit-transition: -webkit-transform 0.5s ease-in-out 0.05s, opacity 0.15s ease-in-out 0s;
-     -moz-transition:    -moz-transform 0.5s ease-in-out 0.05s, opacity 0.15s ease-in-out 0s;
-       -o-transition:      -o-transform 0.5s ease-in-out 0.05s, opacity 0.15s ease-in-out 0s;
           transition:         transform 0.5s ease-in-out 0.05s, opacity 0.15s ease-in-out 0s;
 }
 
@@ -177,15 +170,11 @@ p {
 .bespoke-overview-to .bespoke-title {
   visibility: visible;
   -webkit-transition: opacity 0.5s ease-in-out 0.4s;
-     -moz-transition: opacity 0.5s ease-in-out 0.4s;
-       -o-transition: opacity 0.5s ease-in-out 0.4s;
           transition: opacity 0.5s ease-in-out 0.4s;
 }
 
 .bespoke-overview-from .bespoke-title {
   visibility: visible;
   -webkit-transition: opacity 0.15s ease-in-out;
-     -moz-transition: opacity 0.15s ease-in-out;
-       -o-transition: opacity 0.15s ease-in-out;
           transition: opacity 0.15s ease-in-out;
 }
