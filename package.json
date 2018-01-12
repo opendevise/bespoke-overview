@@ -1,6 +1,6 @@
 {
   "name": "bespoke-overview",
-  "version": "1.0.5",
+  "version": "1.0.6-dev",
   "description": "Presents an overview of all the slides in a Bespoke presentation.",
   "license": "MIT",
   "author": {
