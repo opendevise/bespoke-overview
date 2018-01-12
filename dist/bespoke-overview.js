@@ -6,18 +6,22 @@
  */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g=(g.bespoke||(g.bespoke = {}));g=(g.plugins||(g.plugins = {}));g.overview = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var cssInserted = 0;
 module.exports = function(opts) {
-  require('insert-css')('.bespoke-parent.bespoke-overview{pointer-events:auto}' +
-    '.bespoke-overview :not(img){pointer-events:none}' +
-    '.bespoke-overview .bespoke-slide{opacity:1;visibility:visible;cursor:pointer;pointer-events:auto}' +
-    '.bespoke-overview .bespoke-active{outline:6px solid #cfd8dc;outline-offset:-3px;-moz-outline-radius:3px}' +
-    '.bespoke-overview .bespoke-bullet{opacity:1;visibility:visible}' +
-    '.bespoke-overview-counter{counter-reset:overview}' +
-    '.bespoke-overview-counter .bespoke-slide::after{counter-increment:overview;content:counter(overview);position:absolute;right:.75em;bottom:.5em;font-size:1.25rem;line-height:1.25}' +
-    '.bespoke-title{visibility:hidden;position:absolute;top:0;left:0;width:100%;pointer-events:auto}' +
-    '.bespoke-title h1{margin:0;font-size:1.6em;line-height:1.2;text-align:center}' +
-    '.bespoke-overview:not(.bespoke-overview-to) .bespoke-title{visibility:visible}' +
-    '.bespoke-overview-to .bespoke-active,.bespoke-overview-from .bespoke-active{z-index:1}', { prepend: true });
+  if (cssInserted++ === 0) (function(head, style) {
+    (style = document.createElement('style')).textContent = '.bespoke-parent.bespoke-overview{pointer-events:auto}\n' +
+        '.bespoke-overview :not(img){pointer-events:none}\n' +
+        '.bespoke-overview .bespoke-slide{opacity:1;visibility:visible;cursor:pointer;pointer-events:auto}\n' +
+        '.bespoke-overview .bespoke-active{outline:6px solid #cfd8dc;outline-offset:-3px;-moz-outline-radius:3px}\n' +
+        '.bespoke-overview .bespoke-bullet{opacity:1;visibility:visible}\n' +
+        '.bespoke-overview-counter{counter-reset:overview}\n' +
+        '.bespoke-overview-counter .bespoke-slide::after{counter-increment:overview;content:counter(overview);position:absolute;right:.75em;bottom:.5em;font-size:1.25rem;line-height:1.25}\n' +
+        '.bespoke-title{visibility:hidden;position:absolute;top:0;left:0;width:100%;pointer-events:auto}\n' +
+        '.bespoke-title h1{margin:0;font-size:1.6em;line-height:1.2;text-align:center}\n' +
+        '.bespoke-overview:not(.bespoke-overview-to) .bespoke-title{visibility:visible}\n' +
+        '.bespoke-overview-to .bespoke-active,.bespoke-overview-from .bespoke-active{z-index:1}';
+    head.insertBefore(style, head.firstChild);
+  })(document.head);
   return function(deck) {
     opts = typeof opts === 'object' ? opts : {};
     var KEY_O = 79, KEY_ENT = 13, KEY_UP = 38, KEY_DN = 40,
@@ -297,30 +301,6 @@ module.exports = function(opts) {
     deck.on('overview', toggleOverview);
     document.addEventListener('keydown', onKeydown, false);
   };
-};
-
-},{"insert-css":2}],2:[function(require,module,exports){
-var inserted = {};
-
-module.exports = function (css, options) {
-    if (inserted[css]) return;
-    inserted[css] = true;
-    
-    var elem = document.createElement('style');
-    elem.setAttribute('type', 'text/css');
-
-    if ('textContent' in elem) {
-      elem.textContent = css;
-    } else {
-      elem.styleSheet.cssText = css;
-    }
-    
-    var head = document.getElementsByTagName('head')[0];
-    if (options && options.prepend) {
-        head.insertBefore(elem, head.childNodes[0]);
-    } else {
-        head.appendChild(elem);
-    }
 };
 
 },{}]},{},[1])(1)

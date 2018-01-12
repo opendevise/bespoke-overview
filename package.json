@@ -16,9 +16,6 @@
   "scripts": {
     "test": "gulp"
   },
-  "dependencies": {
-    "insert-css": "^0.2.0"
-  },
   "peerDependencies": {
     "bespoke": ">=1.0.0"
   },
