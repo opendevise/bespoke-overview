@@ -1,7 +1,7 @@
 {
   "name": "bespoke-overview",
-  "version": "1.0.5-dev",
-  "description": "Presents an overview of all the slides in a Bespoke.js presentation.",
+  "version": "1.0.5",
+  "description": "Presents an overview of all the slides in a Bespoke presentation.",
   "license": "MIT",
   "author": {
     "name": "Dan Allen",

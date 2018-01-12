@@ -1,6 +1,6 @@
 = bespoke-overview
 
-This plugin adds an overview mode to your http://markdalgleish.com/projects/bespoke.js[Bespoke] presentation.
+This plugin adds an overview mode to your http://markdalgleish.com/projects/bespoke.js[Bespoke.js] presentation.
 You activate overview mode by pressing the `o` key.
 In this mode, all slides become visible and are arranged on a grid.
 In addition to providing a “big picture” view of your presentation, you can also use this mode as a navigation aid to quickly jump to an arbitrary slide.
