@@ -10,7 +10,8 @@ var cssInserted = 0;
 module.exports = function(opts) {
   if (cssInserted++ === 0) (function(head, style) {
     (style = document.createElement('style')).textContent = '.bespoke-parent.bespoke-overview{pointer-events:auto}\n' +
-        '.bespoke-overview :not(img){pointer-events:none}\n' +
+        '.bespoke-overview *{pointer-events:none}\n' +
+        '.bespoke-overview img{-moz-user-select:none}\n' +
         '.bespoke-overview .bespoke-slide{opacity:1;visibility:visible;cursor:pointer;pointer-events:auto}\n' +
         '.bespoke-overview .bespoke-active{outline:6px solid #cfd8dc;outline-offset:-3px;-moz-outline-radius:3px}\n' +
         '.bespoke-overview .bespoke-bullet{opacity:1;visibility:visible}\n' +
