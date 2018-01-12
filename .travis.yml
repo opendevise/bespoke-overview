@@ -1,3 +1,11 @@
+sudo: false
+dist: trusty
+git:
+  depth: 2
 language: node_js
 node_js:
-  - '0.10'
+- v0.10
+- v0.12
+- v4
+- v6
+- v8

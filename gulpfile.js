@@ -1,18 +1,18 @@
-var gulp = require('gulp'),
+var pkg = require('./package.json'),
+  browserify = require('browserify'),
+  buffer = require('vinyl-buffer'),
+  concat = require('gulp-concat'),
   del = require('del'),
+  gulp = require('gulp'),
+  header = require('gulp-header'),
   jshint = require('gulp-jshint'),
   karma = require('karma'),
-  concat = require('gulp-concat'),
-  header = require('gulp-header'),
   rename = require('gulp-rename'),
   replace = require('gulp-replace'),
-  uglify = require('gulp-uglify'),
-  pkg = require('./package.json'),
-  browserify = require('browserify'),
-  source = require('vinyl-source-stream'),
-  buffer = require('vinyl-buffer'),
+  pages = require('gh-pages'),
   path = require('path'),
-  pages = require('gh-pages');
+  source = require('vinyl-source-stream'),
+  uglify = require('gulp-uglify');
 
 gulp.task('default', ['clean', 'lint', 'test', 'compile']);
 gulp.task('dev', ['compile', 'lint', 'test', 'watch']);
@@ -22,8 +22,8 @@ gulp.task('watch', function() {
   gulp.watch('test/spec/**/*.js', ['test']);
 });
 
-gulp.task('clean', function(done) {
-  del(['dist', 'demo/dist', 'test/coverage'], done);
+gulp.task('clean', function() {
+  del.sync(['dist', 'demo/dist', 'test/coverage']);
 });
 
 gulp.task('lint', function() {
@@ -40,9 +40,7 @@ gulp.task('test', function(done) {
 });
 
 gulp.task('compile', ['clean'], function() {
-  return browserify({ standalone: 'bespoke.plugins.overview' })
-    .add('./lib/bespoke-overview.js')
-    .bundle()
+  return browserify('lib/bespoke-overview.js', { standalone: 'bespoke.plugins.overview' }).bundle()
     .pipe(source('bespoke-overview.js'))
     .pipe(buffer())
     .pipe(header([

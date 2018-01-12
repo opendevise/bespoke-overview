@@ -1,7 +1,7 @@
 /*!
  * bespoke-overview v1.0.5-dev
  *
- * Copyright 2015, Dan Allen
+ * Copyright 2018, Dan Allen
  * This content is released under the MIT license
  */
 
@@ -48,7 +48,7 @@ module.exports = function(opts) {
           style = getComputedStyle(element),
           transitionProperty = style[getStyleProperty(element, 'transitionProperty')];
         if (!transitionProperty || RE_NONE.test(transitionProperty)) return result;
-        // NOTE beyond this point, assume computed style returns compliant values
+        // NOTE assume computed style returns compliant values beyond this point
         transitionProperty = transitionProperty.split(RE_CSV);
         var transitionDuration = style[getStyleProperty(element, 'transitionDuration')].split(RE_CSV),
           transitionDelay = style[getStyleProperty(element, 'transitionDelay')].split(RE_CSV);
@@ -59,7 +59,7 @@ module.exports = function(opts) {
       },
       flushStyle = function(element, property, from, to) {
         if (property) element.style[property] = from;
-        element.offsetHeight; // jshint ignore: line
+        var _ = element.offsetHeight; // jshint ignore:line
         if (property) element.style[property] = to;
       },
       onReady = function() {
@@ -271,7 +271,7 @@ module.exports = function(opts) {
         }
       },
       toggleOverview = function() {
-        overviewActive ? closeOverview() : openOverview(); // jshint ignore:line
+        (overviewActive ? closeOverview : openOverview)();
       },
       onKeydown = function(e) {
         if (e.which === KEY_O) {
