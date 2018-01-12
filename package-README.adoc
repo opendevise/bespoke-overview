@@ -1,0 +1,41 @@
+= bespoke-overview
+
+This plugin adds an overview mode to your http://markdalgleish.com/projects/bespoke.js[Bespoke] presentation.
+You activate overview mode by pressing the `o` key.
+In this mode, all slides become visible and are arranged on a grid.
+In addition to providing a “big picture” view of your presentation, you can also use this mode as a navigation aid to quickly jump to an arbitrary slide.
+
+== Usage
+
+This plugin is shipped in a https://github.com/umdjs/umd[UMD format], meaning it is available as a CommonJS/AMD module or as a browser global.
+
+For example, when using CommonJS modules:
+
+```js
+var bespoke = require('bespoke'),
+  classes = require('bespoke-classes'),
+  keys = require('bespoke-keys'),
+  overview = require('bespoke-overview');
+
+bespoke.from('.deck', [
+  classes(),
+  keys(),
+  overview()
+]);
+```
+
+When using browser globals:
+
+```js
+bespoke.from('.deck', [
+  bespoke.plugins.classes(),
+  bespoke.plugins.keys(),
+  bespoke.plugins.overview()
+]);
+```
+
+For more information about options, styling and how the plugin works, see the https://github.com/opendevise/bespoke-overview/blob/master/README.adoc[complete README] on GitHub.
+
+== License
+
+http://en.wikipedia.org/wiki/MIT_License[MIT]

@@ -2,19 +2,28 @@
   "name": "bespoke-overview",
   "version": "1.0.5-dev",
   "description": "Presents an overview of all the slides in a Bespoke.js presentation.",
-  "homepage": "https://github.com/opendevise/bespoke-overview",
-  "bugs": "https://github.com/opendevise/bespoke-overview/issues",
+  "license": "MIT",
   "author": {
     "name": "Dan Allen",
     "url": "https://github.com/mojavelinux"
   },
-  "main": "./lib/bespoke-overview.js",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/opendevise/bespoke-overview.git"
+  "homepage": "https://github.com/opendevise/bespoke-overview",
+  "repository": "opendevise/bespoke-overview",
+  "bugs": {
+    "url": "https://github.com/opendevise/bespoke-overview/issues"
   },
+  "files": [
+    "dist/",
+    "lib/"
+  ],
+  "main": "./lib/bespoke-overview.js",
   "scripts": {
-    "test": "gulp"
+    "test": "gulp",
+    "prepublishOnly": "node scripts/prepublish",
+    "postpublish": "node scripts/postpublish"
+  },
+  "engines": {
+    "node": ">=0.10.0"
   },
   "peerDependencies": {
     "bespoke": ">=1.0.0"
@@ -53,12 +62,7 @@
     "vinyl-source-stream": "^2.0.0",
     "watchify": "^3.9.0"
   },
-  "engines": {
-    "node": ">=0.10.0"
-  },
-  "license": "MIT",
   "keywords": [
     "bespoke-plugin"
-  ],
-  "readme": "# bespoke-overview\n\nThis plugin adds an overview mode to your [Bespoke.js](http://markdalgleish.com/projects/bespoke.js) presentation, which makes all the slides visible and arranges them on a grid when the `o` key is pressed. This mode gives you a \"big picture\" view of your presentation. You can also use it as a navigation aid to jump to an arbitrary slide.\n\n## Usage\n\nThis plugin is shipped in a [UMD format](https://github.com/umdjs/umd), meaning it is available as a CommonJS/AMD module or as a browser global.\n\nFor example, when using CommonJS modules:\n\n```js\nvar bespoke = require('bespoke'),\n  classes = require('bespoke-classes'),\n  keys = require('bespoke-keys'),\n  overview = require('bespoke-overview');\n\nbespoke.from('.deck', [\n  classes(),\n  keys(),\n  overview()\n]);\n```\n\nWhen using browser globals:\n\n```js\nbespoke.from('.deck', [\n  bespoke.plugins.classes(),\n  bespoke.plugins.keys(),\n  bespoke.plugins.overview()\n]);\n```\n\nFor more information about options, styling and how the plugin works, see the [complete README](https://github.com/opendevise/bespoke-overview/blob/master/README.adoc).\n\n## License\n\n[MIT License](http://en.wikipedia.org/wiki/MIT_License)\n"
+  ]
 }
