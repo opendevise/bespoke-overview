@@ -33,10 +33,10 @@ gulp.task('lint', function() {
 });
 
 gulp.task('test', function(done) {
-  new karma.Server({
-    configFile: __dirname + '/karma.conf.js',
-    singleRun: true
-  }, done).start();
+  new karma.Server({ configFile: __dirname + '/karma.conf.js', singleRun: true })
+    // prevent karma from calling process.exit
+    .on('run_complete', function() { done(); })
+    .start();
 });
 
 gulp.task('compile', ['clean'], function() {
