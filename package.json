@@ -51,7 +51,7 @@
     "simulant": "^0.2.2",
     "vinyl-buffer": "1.0.1",
     "vinyl-source-stream": "^2.0.0",
-    "watchify": "3.9.0"
+    "watchify": "^3.9.0"
   },
   "engines": {
     "node": ">=0.10.0"
